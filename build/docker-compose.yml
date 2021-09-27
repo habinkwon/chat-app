@@ -1,0 +1,11 @@
+version: "3"
+services:
+  chat-server:
+    image: chat-server
+    container_name: chat-server
+    hostname: chat-server
+    restart: on-failure:3
+networks:
+  default:
+    external:
+      name: net

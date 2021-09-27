@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
 
 type Chat struct {
@@ -14,7 +15,7 @@ type Chat struct {
 	Name      string     `json:"name"`
 	Members   []*User    `json:"members"`
 	Messages  []*Message `json:"messages"`
-	CreatedAt string     `json:"createdAt"`
+	CreatedAt time.Time  `json:"createdAt"`
 	CreatedBy *User      `json:"createdBy"`
 }
 
@@ -32,17 +33,17 @@ type Message struct {
 	Sender    *User       `json:"sender"`
 	ReplyTo   *Message    `json:"replyTo"`
 	Replies   []*Message  `json:"replies"`
-	CreatedAt string      `json:"createdAt"`
-	EditedAt  *string     `json:"editedAt"`
+	CreatedAt time.Time   `json:"createdAt"`
+	EditedAt  *time.Time  `json:"editedAt"`
 }
 
 type User struct {
-	ID        string  `json:"id"`
-	Cursor    *string `json:"cursor"`
-	Name      string  `json:"name"`
-	Username  string  `json:"username"`
-	Email     string  `json:"email"`
-	CreatedAt string  `json:"createdAt"`
+	ID        string    `json:"id"`
+	Cursor    *string   `json:"cursor"`
+	Name      string    `json:"name"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type ChatEventType string

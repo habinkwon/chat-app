@@ -12,43 +12,27 @@ import (
 )
 
 func (r *mutationResolver) PostMessage(ctx context.Context, text string, replyTo *string) (*model.Message, error) {
-	return &model.Message{
-		ID:   "123",
-		Text: text,
-	}, nil
+	return message, nil
 }
 
 func (r *mutationResolver) EditMessage(ctx context.Context, id string, text string) (*model.Message, error) {
-	return &model.Message{
-		ID:   "123",
-		Text: text,
-	}, nil
+	return message, nil
 }
 
 func (r *mutationResolver) DeleteMessage(ctx context.Context, id string) (*model.Message, error) {
-	return &model.Message{
-		ID: "123",
-	}, nil
+	return message, nil
 }
 
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	return &model.User{
-		ID: "123",
-	}, nil
+	return user, nil
 }
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	return &model.User{
-		ID: "123",
-	}, nil
+	return user, nil
 }
 
 func (r *queryResolver) Chats(ctx context.Context, first *int, after *string) ([]*model.Chat, error) {
-	return []*model.Chat{
-		{
-			ID: "123",
-		},
-	}, nil
+	return []*model.Chat{chat}, nil
 }
 
 func (r *subscriptionResolver) ChatEvent(ctx context.Context, chatID string) (<-chan *model.ChatEvent, error) {
@@ -61,10 +45,8 @@ func (r *subscriptionResolver) ChatEvent(ctx context.Context, chatID string) (<-
 			select {
 			case <-t.C:
 				ch <- &model.ChatEvent{
-					Type: model.ChatEventTypeMessagePosted,
-					Message: &model.Message{
-						ID: "123",
-					},
+					Type:    model.ChatEventTypeMessagePosted,
+					Message: message,
 				}
 			case <-ctx.Done():
 				return
