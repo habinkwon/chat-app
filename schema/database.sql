@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS users (
 	id UUID PRIMARY KEY,
-	name STRING,
-	username STRING,
+	name STRING NOT NULL,
+	username STRING NOT NULL,
 	email STRING NOT NULL,
 	password STRING NOT NULL,
 	created_at TIMESTAMPTZ NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS chat_members (
 CREATE TABLE IF NOT EXISTS chat_messages (
 	chat_id UUID REFERENCES chats (id) ON DELETE CASCADE,
 	id UUID,
-	type ENUM ('message', 'event'),
+	type ENUM ('message', 'event') NOT NULL,
 	content BYTES NOT NULL,
 	event STRING,
 	sender_id UUID REFERENCES users (id) ON DELETE SET NULL,

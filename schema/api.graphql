@@ -1,0 +1,66 @@
+type Query {
+	me: User!
+	user(id: ID!): User
+	chats(first: Int, after: Cursor): [Chat!]!
+}
+
+type Mutation {
+	postMessage(text: String!, replyTo: ID): Message!
+	editMessage(id: ID!, text: String!): Message!
+	deleteMessage(id: ID!): Message!
+}
+
+type Subscription {
+	chatEvent(chatId: ID!): ChatEvent!
+}
+
+scalar Timestamp
+scalar Cursor
+
+type User {
+	id: ID!
+	cursor: Cursor
+	name: String!
+	username: String!
+	email: String!
+	createdAt: Timestamp!
+}
+
+type Chat {
+	id: ID!
+	cursor: Cursor
+	name: String!
+	members(first: Int, after: Cursor): [User!]!
+	messages(first: Int, after: Cursor): [Message!]!
+	createdAt: Timestamp!
+	createdBy: User
+}
+
+type Message {
+	id: ID!
+	cursor: Cursor
+	type: MessageType!
+	text: String!
+	event: String!
+	sender: User
+	replyTo: Message
+	replies: [Message!]!
+	createdAt: Timestamp!
+	editedAt: Timestamp
+}
+
+enum MessageType {
+	MESSAGE
+	EVENT
+}
+
+type ChatEvent {
+	type: ChatEventType!
+	message: Message
+}
+
+enum ChatEventType {
+	MESSAGE_POSTED
+	MESSAGE_EDITED
+	MESSAGE_DELETED
+}
