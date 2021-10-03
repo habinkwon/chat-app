@@ -15,6 +15,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/neomarica/undergraduate-project/graph/model"
+	"github.com/neomarica/undergraduate-project/pkg/types"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -3879,12 +3880,12 @@ func (ec *executionContext) marshalNChatEventType2githubᚗcomᚋneomaricaᚋund
 }
 
 func (ec *executionContext) unmarshalNID2int64(ctx context.Context, v interface{}) (int64, error) {
-	res, err := graphql.UnmarshalInt64(v)
+	res, err := types.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNID2int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
-	res := graphql.MarshalInt64(v)
+	res := types.MarshalID(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4385,7 +4386,7 @@ func (ec *executionContext) unmarshalOID2ᚖint64(ctx context.Context, v interfa
 	if v == nil {
 		return nil, nil
 	}
-	res, err := graphql.UnmarshalInt64(v)
+	res, err := types.UnmarshalID(v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -4393,7 +4394,7 @@ func (ec *executionContext) marshalOID2ᚖint64(ctx context.Context, sel ast.Sel
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalInt64(*v)
+	return types.MarshalID(*v)
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
