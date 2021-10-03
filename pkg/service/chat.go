@@ -31,6 +31,11 @@ func (s *Chat) CreateChat(ctx context.Context, userIds []int64) (chatId int64, e
 		return 0, fmt.Errorf("no user ids specified")
 	}
 	userIds = append(userIds, userId)
+	if chatId, err = s.ChatMember.Exists(ctx, userIds); err != nil {
+		return 0, err
+	} else if chatId != 0 {
+		return
+	}
 	chatId = s.IDNode.Generate().Int64()
 	now := time.Now()
 	if err := s.Chat.Add(ctx, chatId, userId, now); err != nil {

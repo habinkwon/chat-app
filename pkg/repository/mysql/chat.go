@@ -17,7 +17,7 @@ func (r *Chat) Add(ctx context.Context, id, ownerId int64, tm time.Time) error {
 	VALUES (?, ?, ?)
 	`, id, ownerId, tm)
 	if err != nil {
-		return fmt.Errorf("error adding chat: %w", err)
+		return fmt.Errorf("Chat.Add: %w", err)
 	}
 	return nil
 }
