@@ -5,7 +5,8 @@ type Query {
 }
 
 type Mutation {
-	postMessage(text: String!, replyTo: ID): Message!
+	createChat(userIds: [ID!]!): Chat!
+	postMessage(chatId: ID!, text: String!, replyTo: ID): Message!
 	editMessage(id: ID!, text: String!): Message!
 	deleteMessage(id: ID!): Message!
 }

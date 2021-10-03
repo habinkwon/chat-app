@@ -13,10 +13,15 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/bwmarrin/snowflake"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/neomarica/undergraduate-project/graph"
 	"github.com/neomarica/undergraduate-project/graph/generated"
+	"github.com/neomarica/undergraduate-project/pkg/middleware/auth"
+	"github.com/neomarica/undergraduate-project/pkg/repository/mysql"
+	"github.com/neomarica/undergraduate-project/pkg/service"
 )
 
 func main() {
@@ -48,9 +53,24 @@ func main() {
 	}
 	defer rdb.Close()
 
-	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", h)
+	idNode, err := snowflake.NewNode(0)
+	if err != nil {
+		log.Fatal(fmt.Errorf("error initializing snowflake: %w", err))
+	}
+
+	resolver := &graph.Resolver{
+		Chat: &service.Chat{
+			Chat:        &mysql.Chat{DB: db},
+			ChatMember:  &mysql.ChatMember{DB: db},
+			ChatMessage: &mysql.ChatMessage{DB: db},
+			IDNode:      idNode,
+		},
+	}
+	hs := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
+	mux := chi.NewMux()
+	mux.Use(auth.Middleware())
+	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	mux.Handle("/query", hs)
 
 	l, err := net.Listen("tcp", *listenAddr)
 	if err != nil {
@@ -58,14 +78,14 @@ func main() {
 	}
 	log.Printf("server listening on %s", *listenAddr)
 
-	done := make(chan struct{})
 	srv := &http.Server{
-		Handler: h,
+		Handler: mux,
 	}
+	done := make(chan struct{})
 	go func() {
 		defer close(done)
 		if err := srv.Serve(l); err != nil && err != http.ErrServerClosed {
-			log.Print(fmt.Errorf("error serving: %w", err))
+			log.Print(fmt.Errorf("server error: %w", err))
 		}
 	}()
 	go func() {

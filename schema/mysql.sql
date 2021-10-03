@@ -9,16 +9,16 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS chats (
 	id BIGINT PRIMARY KEY,
-	name VARCHAR(255) NOT NULL,
-	created_at DATETIME NOT NULL,
-	created_by BIGINT -- REFERENCES users (id) ON DELETE SET NULL
+	name VARCHAR(255),
+	created_by BIGINT, -- REFERENCES users (id) ON DELETE SET NULL
+	created_at DATETIME NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS chat_members (
 	chat_id BIGINT NOT NULL, -- REFERENCES chats (id) ON DELETE CASCADE
 	user_id BIGINT NOT NULL, -- REFERENCES users (id) ON DELETE CASCADE
-	added_at DATETIME NOT NULL,
 	added_by BIGINT, -- REFERENCES users (id) ON DELETE SET NULL
+	added_at DATETIME NOT NULL,
 	PRIMARY KEY (chat_id, user_id)
 );
 

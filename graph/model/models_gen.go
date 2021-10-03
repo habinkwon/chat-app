@@ -10,7 +10,7 @@ import (
 )
 
 type Chat struct {
-	ID        string     `json:"id"`
+	ID        int64      `json:"id"`
 	Cursor    *string    `json:"cursor"`
 	Name      string     `json:"name"`
 	Members   []*User    `json:"members"`
@@ -25,7 +25,7 @@ type ChatEvent struct {
 }
 
 type Message struct {
-	ID        string      `json:"id"`
+	ID        int64       `json:"id"`
 	Cursor    *string     `json:"cursor"`
 	Type      MessageType `json:"type"`
 	Text      string      `json:"text"`
@@ -38,7 +38,7 @@ type Message struct {
 }
 
 type User struct {
-	ID        string    `json:"id"`
+	ID        int64     `json:"id"`
 	Cursor    *string   `json:"cursor"`
 	Name      string    `json:"name"`
 	Username  string    `json:"username"`

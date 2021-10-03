@@ -11,15 +11,25 @@ import (
 	"github.com/neomarica/undergraduate-project/graph/model"
 )
 
-func (r *mutationResolver) PostMessage(ctx context.Context, text string, replyTo *string) (*model.Message, error) {
+func (r *mutationResolver) CreateChat(ctx context.Context, userIds []int64) (*model.Chat, error) {
+	chatId, err := r.Chat.CreateChat(ctx, userIds)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Chat{
+		ID: chatId,
+	}, nil
+}
+
+func (r *mutationResolver) PostMessage(ctx context.Context, chatID int64, text string, replyTo *int64) (*model.Message, error) {
 	return message, nil
 }
 
-func (r *mutationResolver) EditMessage(ctx context.Context, id string, text string) (*model.Message, error) {
+func (r *mutationResolver) EditMessage(ctx context.Context, id int64, text string) (*model.Message, error) {
 	return message, nil
 }
 
-func (r *mutationResolver) DeleteMessage(ctx context.Context, id string) (*model.Message, error) {
+func (r *mutationResolver) DeleteMessage(ctx context.Context, id int64) (*model.Message, error) {
 	return message, nil
 }
 
@@ -27,7 +37,7 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	return user, nil
 }
 
-func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+func (r *queryResolver) User(ctx context.Context, id int64) (*model.User, error) {
 	return user, nil
 }
 
@@ -35,7 +45,7 @@ func (r *queryResolver) Chats(ctx context.Context, first *int, after *string) ([
 	return []*model.Chat{chat}, nil
 }
 
-func (r *subscriptionResolver) ChatEvent(ctx context.Context, chatID string) (<-chan *model.ChatEvent, error) {
+func (r *subscriptionResolver) ChatEvent(ctx context.Context, chatID int64) (<-chan *model.ChatEvent, error) {
 	ch := make(chan *model.ChatEvent)
 	go func() {
 		defer close(ch)
