@@ -1,7 +1,8 @@
 type Query {
 	me: User!
 	user(id: ID!): User
-	chats(first: Int, after: Cursor): [Chat!]!
+	chat(id: ID!): Chat
+	chats(first: Int, after: ID): [Chat!]!
 }
 
 type Mutation {
@@ -15,39 +16,36 @@ type Subscription {
 	chatEvent(chatId: ID!): ChatEvent!
 }
 
-scalar Timestamp
-scalar Cursor
+scalar Time
 
 type User {
 	id: ID!
-	cursor: Cursor
 	name: String!
 	username: String!
 	email: String!
-	createdAt: Timestamp!
+	createdAt: Time!
 }
 
 type Chat {
 	id: ID!
-	cursor: Cursor
 	name: String!
-	members(first: Int, after: Cursor): [User!]!
-	messages(first: Int, after: Cursor): [Message!]!
-	createdAt: Timestamp!
+	members(first: Int, after: ID): [User!]!
+	messages(first: Int, after: ID, desc: Boolean): [Message!]!
 	createdBy: User
+	createdAt: Time!
+	lastPostedAt: Time!
 }
 
 type Message {
 	id: ID!
-	cursor: Cursor
 	type: MessageType!
 	text: String!
 	event: String!
 	sender: User
 	replyTo: Message
 	replies: [Message!]!
-	createdAt: Timestamp!
-	editedAt: Timestamp
+	createdAt: Time!
+	editedAt: Time
 }
 
 enum MessageType {

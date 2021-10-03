@@ -7,5 +7,6 @@ import "github.com/neomarica/undergraduate-project/pkg/service"
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	Chat *service.Chat
+	UserSvc *service.User
+	ChatSvc *service.Chat
 }

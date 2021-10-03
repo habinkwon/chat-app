@@ -10,26 +10,27 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS chats (
 	id BIGINT PRIMARY KEY,
 	name VARCHAR(255),
-	created_by BIGINT, -- REFERENCES users (id) ON DELETE SET NULL
-	created_at DATETIME NOT NULL
+	created_by BIGINT NOT NULL, -- REFERENCES users (id) ON DELETE SET NULL
+	created_at DATETIME NOT NULL,
+	last_posted_at DATETIME NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS chat_members (
 	chat_id BIGINT NOT NULL, -- REFERENCES chats (id) ON DELETE CASCADE
 	user_id BIGINT NOT NULL, -- REFERENCES users (id) ON DELETE CASCADE
-	added_by BIGINT, -- REFERENCES users (id) ON DELETE SET NULL
+	added_by BIGINT NOT NULL, -- REFERENCES users (id) ON DELETE SET NULL
 	added_at DATETIME NOT NULL,
 	PRIMARY KEY (chat_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS chat_messages (
-	chat_id BIGINT, -- REFERENCES chats (id) ON DELETE CASCADE
-	id BIGINT,
+	chat_id BIGINT NOT NULL, -- REFERENCES chats (id) ON DELETE CASCADE
+	id BIGINT NOT NULL,
 	type ENUM ('message', 'event') NOT NULL,
-	content MEDIUMBLOB NOT NULL,
+	content MEDIUMBLOB,
 	event TEXT,
-	sender_id BIGINT, -- REFERENCES users (id) ON DELETE SET NULL
-	reply_to BIGINT, -- REFERENCES chat_messages (id) ON DELETE SET NULL
+	sender_id BIGINT NOT NULL, -- REFERENCES users (id) ON DELETE SET NULL
+	reply_to BIGINT NOT NULL, -- REFERENCES chat_messages (id) ON DELETE SET NULL
 	created_at DATETIME NOT NULL,
 	edited_at DATETIME,
 	PRIMARY KEY (chat_id, id)

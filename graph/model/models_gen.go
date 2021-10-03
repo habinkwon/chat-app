@@ -9,16 +9,6 @@ import (
 	"time"
 )
 
-type Chat struct {
-	ID        int64      `json:"id"`
-	Cursor    *string    `json:"cursor"`
-	Name      string     `json:"name"`
-	Members   []*User    `json:"members"`
-	Messages  []*Message `json:"messages"`
-	CreatedAt time.Time  `json:"createdAt"`
-	CreatedBy *User      `json:"createdBy"`
-}
-
 type ChatEvent struct {
 	Type    ChatEventType `json:"type"`
 	Message *Message      `json:"message"`
@@ -26,7 +16,6 @@ type ChatEvent struct {
 
 type Message struct {
 	ID        int64       `json:"id"`
-	Cursor    *string     `json:"cursor"`
 	Type      MessageType `json:"type"`
 	Text      string      `json:"text"`
 	Event     string      `json:"event"`
@@ -39,7 +28,6 @@ type Message struct {
 
 type User struct {
 	ID        int64     `json:"id"`
-	Cursor    *string   `json:"cursor"`
 	Name      string    `json:"name"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`

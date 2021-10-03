@@ -26,7 +26,7 @@ import (
 
 func main() {
 	listenAddr := flag.String("listen", ":8080", "")
-	mysqlAddr := flag.String("mysql", "root@/chat", "")
+	mysqlAddr := flag.String("mysql", "root:@/chat?parseTime=true", "")
 	redisAddr := flag.String("redis", "localhost:6379", "")
 	flag.Parse()
 
@@ -59,11 +59,12 @@ func main() {
 	}
 
 	resolver := &graph.Resolver{
-		Chat: &service.Chat{
-			Chat:        &mysql.Chat{DB: db},
-			ChatMember:  &mysql.ChatMember{DB: db},
-			ChatMessage: &mysql.ChatMessage{DB: db},
-			IDNode:      idNode,
+		UserSvc: &service.User{},
+		ChatSvc: &service.Chat{
+			ChatRepo:        &mysql.Chat{DB: db},
+			ChatMemberRepo:  &mysql.ChatMember{DB: db},
+			ChatMessageRepo: &mysql.ChatMessage{DB: db},
+			IDNode:          idNode,
 		},
 	}
 	hs := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
