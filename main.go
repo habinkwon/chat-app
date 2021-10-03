@@ -26,8 +26,8 @@ import (
 
 func main() {
 	listenAddr := flag.String("listen", ":8080", "")
-	mysqlAddr := flag.String("mysql", "root:@/chat?parseTime=true", "")
-	redisAddr := flag.String("redis", "localhost:6379", "")
+	mysqlAddr := flag.String("mysql", "root@tcp(maria)/chat?parseTime=true", "")
+	redisAddr := flag.String("redis", "redis:6379", "")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
