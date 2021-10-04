@@ -18,32 +18,32 @@ type Chat struct {
 	IDNode          *snowflake.Node
 }
 
-func (s *Chat) CreateChat(ctx context.Context, userIds []int64) (chatId int64, err error) {
-	userId := auth.UserId(ctx)
-	if userId == 0 {
+func (s *Chat) CreateChat(ctx context.Context, userIds []int64) (id int64, err error) {
+	inviterId := auth.UserId(ctx)
+	if inviterId == 0 {
 		return 0, auth.ErrNoAuth
 	}
 	for _, id := range userIds {
-		if id == 0 || id == userId {
+		if id == 0 || id == inviterId {
 			return 0, fmt.Errorf("invalid user id %v", id)
 		}
 	}
 	if len(userIds) == 0 {
 		return 0, fmt.Errorf("no user ids specified")
 	}
-	userIds = append(userIds, userId)
-	if chatId, err = s.ChatRepo.Exists(ctx, userIds); err != nil {
+	userIds = append(userIds, inviterId)
+	if id, err = s.ChatRepo.Exists(ctx, userIds); err != nil {
 		return 0, err
-	} else if chatId != 0 {
+	} else if id != 0 {
 		return
 	}
-	chatId = s.IDNode.Generate().Int64()
+	id = s.IDNode.Generate().Int64()
 	now := time.Now()
-	if err := s.ChatRepo.Add(ctx, chatId, userId, now); err != nil {
+	if err := s.ChatRepo.Add(ctx, id, inviterId, now); err != nil {
 		return 0, err
 	}
-	for _, id := range userIds {
-		if err := s.ChatMemberRepo.Add(ctx, chatId, id, userId, now); err != nil {
+	for _, userId := range userIds {
+		if err := s.ChatMemberRepo.Add(ctx, id, userId, inviterId, now); err != nil {
 			return 0, err
 		}
 	}
@@ -64,4 +64,63 @@ func (s *Chat) ListChats(ctx context.Context, first int, after int64) ([]*model.
 		return nil, auth.ErrNoAuth
 	}
 	return s.ChatRepo.List(ctx, userId, first, after)
+}
+
+func (s *Chat) PostMessage(ctx context.Context, chatId int64, content string) (id int64, err error) {
+	userId := auth.UserId(ctx)
+	if userId == 0 {
+		return 0, auth.ErrNoAuth
+	}
+	if ok, err := s.ChatMemberRepo.Exists(ctx, chatId, userId); err != nil {
+		return 0, err
+	} else if !ok {
+		return 0, auth.ErrPerm
+	}
+	id = s.IDNode.Generate().Int64()
+	now := time.Now()
+	if err := s.ChatMessageRepo.Add(ctx, id, chatId, content, userId, now); err != nil {
+		return 0, err
+	}
+	return
+}
+
+func (s *Chat) DeleteMessage(ctx context.Context, id int64) error {
+	userId := auth.UserId(ctx)
+	if userId == 0 {
+		return auth.ErrNoAuth
+	}
+	if senderId, err := s.ChatMessageRepo.GetSenderId(ctx, id); err != nil {
+		return err
+	} else if senderId != userId {
+		return auth.ErrPerm
+	}
+	if err := s.ChatMessageRepo.Delete(ctx, id); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Chat) EditMessage(ctx context.Context, id int64, content string) error {
+	userId := auth.UserId(ctx)
+	if userId == 0 {
+		return auth.ErrNoAuth
+	}
+	if senderId, err := s.ChatMessageRepo.GetSenderId(ctx, id); err != nil {
+		return err
+	} else if senderId != userId {
+		return auth.ErrPerm
+	}
+	now := time.Now()
+	if err := s.ChatMessageRepo.Edit(ctx, id, content, now); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Chat) ListMessages(ctx context.Context, chatId int64, first int, after int64, desc bool) ([]*model.Message, error) {
+	userId := auth.UserId(ctx)
+	if userId == 0 {
+		return nil, auth.ErrNoAuth
+	}
+	return s.ChatMessageRepo.List(ctx, chatId, first, after, desc)
 }

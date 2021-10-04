@@ -14,18 +14,6 @@ type ChatEvent struct {
 	Message *Message      `json:"message"`
 }
 
-type Message struct {
-	ID        int64       `json:"id"`
-	Type      MessageType `json:"type"`
-	Text      string      `json:"text"`
-	Event     string      `json:"event"`
-	Sender    *User       `json:"sender"`
-	ReplyTo   *Message    `json:"replyTo"`
-	Replies   []*Message  `json:"replies"`
-	CreatedAt time.Time   `json:"createdAt"`
-	EditedAt  *time.Time  `json:"editedAt"`
-}
-
 type User struct {
 	ID        int64     `json:"id"`
 	Name      string    `json:"name"`

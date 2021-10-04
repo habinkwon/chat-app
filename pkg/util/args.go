@@ -13,3 +13,10 @@ func Int64Or(v *int64, d int64) int64 {
 	}
 	return d
 }
+
+func BoolOr(v *bool, d bool) bool {
+	if v != nil {
+		return *v
+	}
+	return d
+}

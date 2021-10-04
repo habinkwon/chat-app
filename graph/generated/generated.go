@@ -39,6 +39,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Chat() ChatResolver
+	Message() MessageResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 	Subscription() SubscriptionResolver
@@ -106,6 +107,11 @@ type ChatResolver interface {
 	Members(ctx context.Context, obj *model.Chat, first *int, after *int64) ([]*model.User, error)
 	Messages(ctx context.Context, obj *model.Chat, first *int, after *int64, desc *bool) ([]*model.Message, error)
 	CreatedBy(ctx context.Context, obj *model.Chat) (*model.User, error)
+}
+type MessageResolver interface {
+	Sender(ctx context.Context, obj *model.Message) (*model.User, error)
+	ReplyTo(ctx context.Context, obj *model.Message) (*model.Message, error)
+	Replies(ctx context.Context, obj *model.Message) ([]*model.Message, error)
 }
 type MutationResolver interface {
 	CreateChat(ctx context.Context, userIds []int64) (*model.Chat, error)
@@ -1306,14 +1312,14 @@ func (ec *executionContext) _Message_sender(ctx context.Context, field graphql.C
 		Object:     "Message",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Sender, nil
+		return ec.resolvers.Message().Sender(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1338,14 +1344,14 @@ func (ec *executionContext) _Message_replyTo(ctx context.Context, field graphql.
 		Object:     "Message",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ReplyTo, nil
+		return ec.resolvers.Message().ReplyTo(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1370,14 +1376,14 @@ func (ec *executionContext) _Message_replies(ctx context.Context, field graphql.
 		Object:     "Message",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Replies, nil
+		return ec.resolvers.Message().Replies(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3336,36 +3342,63 @@ func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, 
 		case "id":
 			out.Values[i] = ec._Message_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "type":
 			out.Values[i] = ec._Message_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "text":
 			out.Values[i] = ec._Message_text(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "event":
 			out.Values[i] = ec._Message_event(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "sender":
-			out.Values[i] = ec._Message_sender(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Message_sender(ctx, field, obj)
+				return res
+			})
 		case "replyTo":
-			out.Values[i] = ec._Message_replyTo(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Message_replyTo(ctx, field, obj)
+				return res
+			})
 		case "replies":
-			out.Values[i] = ec._Message_replies(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Message_replies(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "createdAt":
 			out.Values[i] = ec._Message_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "editedAt":
 			out.Values[i] = ec._Message_editedAt(ctx, field, obj)

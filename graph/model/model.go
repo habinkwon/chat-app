@@ -11,3 +11,15 @@ type Chat struct {
 	CreatedAt    time.Time `json:"createdAt"`
 	LastPostedAt time.Time `json:"lastPostedAt"`
 }
+
+type Message struct {
+	ID        int64       `json:"id"`
+	Type      MessageType `json:"type"`
+	Text      string      `json:"text"`
+	Event     string      `json:"event"`
+	SenderID  int64       `json:"sender"`
+	ReplyToID int64       `json:"replyTo"`
+	ReplyIDs  []int64     `json:"replies"`
+	CreatedAt time.Time   `json:"createdAt"`
+	EditedAt  *time.Time  `json:"editedAt"`
+}

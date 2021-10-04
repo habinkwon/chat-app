@@ -7,7 +7,10 @@ import (
 	"strconv"
 )
 
-var ErrNoAuth = errors.New("authentication required")
+var (
+	ErrNoAuth = errors.New("authentication required")
+	ErrPerm   = errors.New("operation not permitted")
+)
 
 type userIdKey struct{}
 
