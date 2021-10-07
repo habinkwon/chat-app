@@ -22,6 +22,7 @@ import (
 	"github.com/neomarica/undergraduate-project/pkg/middleware/auth"
 	"github.com/neomarica/undergraduate-project/pkg/repository/mysql"
 	"github.com/neomarica/undergraduate-project/pkg/service"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -68,10 +69,11 @@ func main() {
 		},
 	}
 	hs := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
-	mux := chi.NewMux()
-	mux.Use(auth.Middleware())
-	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	mux.Handle("/query", hs)
+	r := chi.NewRouter()
+	r.Use(cors.Default().Handler)
+	r.Use(auth.Middleware())
+	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	r.Handle("/query", hs)
 
 	l, err := net.Listen("tcp", *listenAddr)
 	if err != nil {
@@ -80,7 +82,7 @@ func main() {
 	log.Printf("server listening on %s", *listenAddr)
 
 	srv := &http.Server{
-		Handler: mux,
+		Handler: r,
 	}
 	done := make(chan struct{})
 	go func() {
