@@ -16,8 +16,7 @@ type Message struct {
 	Content   string      `json:"content"`
 	Event     string      `json:"event"`
 	SenderID  int64       `json:"sender"`
-	ReplyToID int64       `json:"replyTo"`
-	ReplyIDs  []int64     `json:"replies"`
+	ReplyToID *int64      `json:"replyTo"`
 	CreatedAt time.Time   `json:"createdAt"`
 	EditedAt  *time.Time  `json:"editedAt"`
 }

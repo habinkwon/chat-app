@@ -44,7 +44,6 @@ type Message {
 	event: String!
 	sender: User
 	replyTo: Message
-	replies: [Message!]!
 	createdAt: Time!
 	editedAt: Time
 }

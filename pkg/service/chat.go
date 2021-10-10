@@ -11,6 +11,7 @@ import (
 	"github.com/neomarica/undergraduate-project/pkg/middleware/auth"
 	"github.com/neomarica/undergraduate-project/pkg/repository/mysql"
 	"github.com/neomarica/undergraduate-project/pkg/repository/redis"
+	"github.com/neomarica/undergraduate-project/pkg/util"
 )
 
 type Chat struct {
@@ -107,13 +108,13 @@ func (s *Chat) GetMemberIds(ctx context.Context, chatId int64) (memberIds []int6
 	memberIds, err = s.ChatMemberRepo.Get(ctx, chatId)
 	if err != nil {
 		return nil, err
-	} else if !containsInt64(memberIds, userId) {
+	} else if !util.ContainsInt64(memberIds, userId) {
 		return nil, auth.ErrPerm
 	}
 	return
 }
 
-func (s *Chat) PostMessage(ctx context.Context, chatId int64, content string) (id int64, err error) {
+func (s *Chat) PostMessage(ctx context.Context, chatId int64, content string, replyTo *int64) (id int64, err error) {
 	userId := auth.UserId(ctx)
 	if userId == 0 {
 		return 0, auth.ErrNoAuth
@@ -122,14 +123,23 @@ func (s *Chat) PostMessage(ctx context.Context, chatId int64, content string) (i
 	memberIds, err := s.ChatMemberRepo.Get(ctx, chatId)
 	if err != nil {
 		return 0, err
-	} else if !containsInt64(memberIds, userId) {
+	} else if !util.ContainsInt64(memberIds, userId) {
 		return 0, auth.ErrPerm
+	}
+
+	if replyTo != nil {
+		if ok, err := s.ChatMessageRepo.Exists(ctx, *replyTo, chatId); err != nil {
+			return 0, err
+		} else if !ok {
+			return 0, fmt.Errorf("message %d does not exist in chat %d", *replyTo, chatId)
+		}
 	}
 
 	m := &model.Message{
 		ID:        s.IDNode.Generate().Int64(),
 		Content:   content,
 		SenderID:  userId,
+		ReplyToID: replyTo,
 		CreatedAt: time.Now(),
 	}
 	if err := s.ChatMessageRepo.Add(ctx, chatId, m); err != nil {
@@ -144,7 +154,7 @@ func (s *Chat) PostMessage(ctx context.Context, chatId int64, content string) (i
 	if err := s.ChannelRepo.SendEvent(ctx, memberIds, e); err != nil {
 		log.Print(err)
 	}
-	return
+	return m.ID, nil
 }
 
 func (s *Chat) DeleteMessage(ctx context.Context, id int64) error {
@@ -163,7 +173,7 @@ func (s *Chat) DeleteMessage(ctx context.Context, id int64) error {
 	memberIds, err := s.ChatMemberRepo.Get(ctx, chatId)
 	if err != nil {
 		return err
-	} else if !containsInt64(memberIds, userId) {
+	} else if !util.ContainsInt64(memberIds, userId) {
 		return auth.ErrPerm
 	}
 
@@ -203,7 +213,7 @@ func (s *Chat) EditMessage(ctx context.Context, id int64, content string) error 
 	memberIds, err := s.ChatMemberRepo.Get(ctx, chatId)
 	if err != nil {
 		return err
-	} else if !containsInt64(memberIds, userId) {
+	} else if !util.ContainsInt64(memberIds, userId) {
 		return auth.ErrPerm
 	}
 
@@ -228,6 +238,14 @@ func (s *Chat) EditMessage(ctx context.Context, id int64, content string) error 
 	return nil
 }
 
+func (s *Chat) GetMessage(ctx context.Context, id int64) (*model.Message, error) {
+	userId := auth.UserId(ctx)
+	if userId == 0 {
+		return nil, auth.ErrNoAuth
+	}
+	return s.ChatMessageRepo.Get(ctx, id, userId)
+}
+
 func (s *Chat) ListMessages(ctx context.Context, chatId int64, first int, after int64, desc bool) ([]*model.Message, error) {
 	userId := auth.UserId(ctx)
 	if userId == 0 {
@@ -245,13 +263,4 @@ func (s *Chat) ReceiveEvents(ctx context.Context, userID int64) (<-chan *model.C
 		}
 	}()
 	return c, nil
-}
-
-func containsInt64(s []int64, v int64) bool {
-	for _, e := range s {
-		if v == e {
-			return true
-		}
-	}
-	return false
 }

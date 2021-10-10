@@ -71,7 +71,6 @@ type ComplexityRoot struct {
 		EditedAt  func(childComplexity int) int
 		Event     func(childComplexity int) int
 		ID        func(childComplexity int) int
-		Replies   func(childComplexity int) int
 		ReplyTo   func(childComplexity int) int
 		Sender    func(childComplexity int) int
 		Type      func(childComplexity int) int
@@ -113,7 +112,6 @@ type ChatResolver interface {
 type MessageResolver interface {
 	Sender(ctx context.Context, obj *model.Message) (*model.User, error)
 	ReplyTo(ctx context.Context, obj *model.Message) (*model.Message, error)
-	Replies(ctx context.Context, obj *model.Message) ([]*model.Message, error)
 }
 type MutationResolver interface {
 	CreateChat(ctx context.Context, userIds []int64) (*model.Chat, error)
@@ -256,13 +254,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Message.ID(childComplexity), true
-
-	case "Message.replies":
-		if e.complexity.Message.Replies == nil {
-			break
-		}
-
-		return e.complexity.Message.Replies(childComplexity), true
 
 	case "Message.replyTo":
 		if e.complexity.Message.ReplyTo == nil {
@@ -562,7 +553,6 @@ type Message {
 	event: String!
 	sender: User
 	replyTo: Message
-	replies: [Message!]!
 	createdAt: Time!
 	editedAt: Time
 }
@@ -1401,41 +1391,6 @@ func (ec *executionContext) _Message_replyTo(ctx context.Context, field graphql.
 	res := resTmp.(*model.Message)
 	fc.Result = res
 	return ec.marshalOMessage2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Message_replies(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Message",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Message().Replies(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Message)
-	fc.Result = res
-	return ec.marshalNMessage2ᚕᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessageᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Message_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
@@ -3464,20 +3419,6 @@ func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, 
 					}
 				}()
 				res = ec._Message_replyTo(ctx, field, obj)
-				return res
-			})
-		case "replies":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Message_replies(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			})
 		case "createdAt":

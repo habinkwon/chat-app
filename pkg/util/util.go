@@ -20,3 +20,12 @@ func BoolOr(v *bool, d bool) bool {
 	}
 	return d
 }
+
+func ContainsInt64(s []int64, v int64) bool {
+	for _, e := range s {
+		if v == e {
+			return true
+		}
+	}
+	return false
+}

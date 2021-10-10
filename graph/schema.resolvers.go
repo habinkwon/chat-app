@@ -32,11 +32,10 @@ func (r *messageResolver) Sender(ctx context.Context, obj *model.Message) (*mode
 }
 
 func (r *messageResolver) ReplyTo(ctx context.Context, obj *model.Message) (*model.Message, error) {
-	return nil, nil
-}
-
-func (r *messageResolver) Replies(ctx context.Context, obj *model.Message) ([]*model.Message, error) {
-	return nil, nil
+	if obj.ReplyToID == nil {
+		return nil, nil
+	}
+	return r.ChatSvc.GetMessage(ctx, *obj.ReplyToID)
 }
 
 func (r *mutationResolver) CreateChat(ctx context.Context, userIds []int64) (*model.Chat, error) {
@@ -61,7 +60,7 @@ func (r *mutationResolver) DeleteChat(ctx context.Context, id int64) (*model.Cha
 }
 
 func (r *mutationResolver) PostMessage(ctx context.Context, chatID int64, text string, replyTo *int64) (*model.Message, error) {
-	id, err := r.ChatSvc.PostMessage(ctx, chatID, text)
+	id, err := r.ChatSvc.PostMessage(ctx, chatID, text, replyTo)
 	if err != nil {
 		return nil, err
 	}
