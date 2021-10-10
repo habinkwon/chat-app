@@ -11,8 +11,12 @@ import (
 	"github.com/neomarica/undergraduate-project/pkg/util"
 )
 
-func (r *chatResolver) Members(ctx context.Context, obj *model.Chat, first *int, after *int64) ([]*model.User, error) {
-	return r.UserSvc.GetUsers(ctx, obj.MemberIDs)
+func (r *chatResolver) Members(ctx context.Context, obj *model.Chat) ([]*model.User, error) {
+	memberIds, err := r.ChatSvc.GetMemberIds(ctx, obj.ID)
+	if err != nil {
+		return nil, err
+	}
+	return r.UserSvc.GetUsers(ctx, memberIds)
 }
 
 func (r *chatResolver) Messages(ctx context.Context, obj *model.Chat, first *int, after *int64, desc *bool) ([]*model.Message, error) {

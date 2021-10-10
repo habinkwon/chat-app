@@ -69,6 +69,21 @@ func (s *Chat) ListChats(ctx context.Context, first int, after int64) ([]*model.
 	return s.ChatRepo.List(ctx, userId, first, after)
 }
 
+func (s *Chat) GetMemberIds(ctx context.Context, chatId int64) (memberIds []int64, err error) {
+	userId := auth.UserId(ctx)
+	if userId == 0 {
+		return nil, auth.ErrNoAuth
+	}
+
+	memberIds, err = s.ChatMemberRepo.Get(ctx, chatId)
+	if err != nil {
+		return nil, err
+	} else if !containsInt64(memberIds, userId) {
+		return nil, auth.ErrPerm
+	}
+	return
+}
+
 func (s *Chat) PostMessage(ctx context.Context, chatId int64, content string) (id int64, err error) {
 	userId := auth.UserId(ctx)
 	if userId == 0 {
@@ -77,7 +92,7 @@ func (s *Chat) PostMessage(ctx context.Context, chatId int64, content string) (i
 
 	memberIds, err := s.ChatMemberRepo.Get(ctx, chatId)
 	if err != nil {
-		return
+		return 0, err
 	} else if !containsInt64(memberIds, userId) {
 		return 0, auth.ErrPerm
 	}

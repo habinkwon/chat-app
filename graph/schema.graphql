@@ -29,7 +29,7 @@ type User {
 type Chat {
 	id: ID!
 	name: String!
-	members(first: Int, after: ID): [User!]!
+	members: [User!]!
 	messages(first: Int, after: ID, desc: Boolean): [Message!]!
 	createdBy: User
 	createdAt: Time!

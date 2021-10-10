@@ -54,7 +54,7 @@ type ComplexityRoot struct {
 		CreatedBy    func(childComplexity int) int
 		ID           func(childComplexity int) int
 		LastPostedAt func(childComplexity int) int
-		Members      func(childComplexity int, first *int, after *int64) int
+		Members      func(childComplexity int) int
 		Messages     func(childComplexity int, first *int, after *int64, desc *bool) int
 		Name         func(childComplexity int) int
 	}
@@ -105,7 +105,7 @@ type ComplexityRoot struct {
 }
 
 type ChatResolver interface {
-	Members(ctx context.Context, obj *model.Chat, first *int, after *int64) ([]*model.User, error)
+	Members(ctx context.Context, obj *model.Chat) ([]*model.User, error)
 	Messages(ctx context.Context, obj *model.Chat, first *int, after *int64, desc *bool) ([]*model.Message, error)
 	CreatedBy(ctx context.Context, obj *model.Chat) (*model.User, error)
 }
@@ -178,12 +178,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Chat_members_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Chat.Members(childComplexity, args["first"].(*int), args["after"].(*int64)), true
+		return e.complexity.Chat.Members(childComplexity), true
 
 	case "Chat.messages":
 		if e.complexity.Chat.Messages == nil {
@@ -538,7 +533,7 @@ type User {
 type Chat {
 	id: ID!
 	name: String!
-	members(first: Int, after: ID): [User!]!
+	members: [User!]!
 	messages(first: Int, after: ID, desc: Boolean): [Message!]!
 	createdBy: User
 	createdAt: Time!
@@ -580,30 +575,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) field_Chat_members_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["first"] = arg0
-	var arg1 *int64
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOID2ᚖint64(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["after"] = arg1
-	return args, nil
-}
 
 func (ec *executionContext) field_Chat_messages_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -933,16 +904,9 @@ func (ec *executionContext) _Chat_members(ctx context.Context, field graphql.Col
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Chat_members_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Chat().Members(rctx, obj, args["first"].(*int), args["after"].(*int64))
+		return ec.resolvers.Chat().Members(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
