@@ -25,6 +25,17 @@ func (r *Chat) Add(ctx context.Context, id, ownerId int64, tm time.Time) error {
 	return nil
 }
 
+func (r *Chat) Delete(ctx context.Context, id int64) error {
+	_, err := r.DB.ExecContext(ctx, `
+	DELETE FROM chats
+	WHERE id = ?
+	`, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *Chat) Exists(ctx context.Context, userIds []int64) (chatId int64, err error) {
 	// https://stackoverflow.com/questions/12776178/sql-select-sets-containing-exactly-given-members
 	in := strings.Repeat(", ?", len(userIds)-1)

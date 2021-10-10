@@ -21,13 +21,30 @@ func (r *ChatMember) Add(ctx context.Context, chatId, userId, inviterId int64, t
 	return nil
 }
 
+func (r *ChatMember) Delete(ctx context.Context, chatId, userId int64) error {
+	_, err := r.DB.ExecContext(ctx, `
+	DELETE FROM chat_members
+	WHERE chat_id = ? AND user_id = ?
+	`, chatId, userId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *ChatMember) Exists(ctx context.Context, chatId, userId int64) (ok bool, err error) {
-	var cnt int
-	err = r.DB.QueryRowContext(ctx, `
+	query := `
 	SELECT COUNT(*)
 	FROM chat_members
-	WHERE chat_id = ? AND user_id = ?
-	`, chatId, userId).Scan(&cnt)
+	WHERE chat_id = ?
+	`
+	args := []interface{}{chatId}
+	if userId != 0 {
+		query += " AND user_id = ?"
+		args = append(args, userId)
+	}
+	var cnt int
+	err = r.DB.QueryRowContext(ctx, query, args...).Scan(&cnt)
 	if err != nil {
 		return false, err
 	}

@@ -79,6 +79,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateChat    func(childComplexity int, userIds []int64) int
+		DeleteChat    func(childComplexity int, id int64) int
 		DeleteMessage func(childComplexity int, id int64) int
 		EditMessage   func(childComplexity int, id int64, text string) int
 		PostMessage   func(childComplexity int, chatID int64, text string, replyTo *int64) int
@@ -116,6 +117,7 @@ type MessageResolver interface {
 }
 type MutationResolver interface {
 	CreateChat(ctx context.Context, userIds []int64) (*model.Chat, error)
+	DeleteChat(ctx context.Context, id int64) (*model.Chat, error)
 	PostMessage(ctx context.Context, chatID int64, text string, replyTo *int64) (*model.Message, error)
 	EditMessage(ctx context.Context, id int64, text string) (*model.Message, error)
 	DeleteMessage(ctx context.Context, id int64) (*model.Message, error)
@@ -294,6 +296,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateChat(childComplexity, args["userIds"].([]int64)), true
+
+	case "Mutation.deleteChat":
+		if e.complexity.Mutation.DeleteChat == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteChat_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteChat(childComplexity, args["id"].(int64)), true
 
 	case "Mutation.deleteMessage":
 		if e.complexity.Mutation.DeleteMessage == nil {
@@ -511,6 +525,7 @@ var sources = []*ast.Source{
 
 type Mutation {
 	createChat(userIds: [ID!]!): Chat!
+	deleteChat(id: ID!): Chat!
 	postMessage(chatId: ID!, text: String!, replyTo: ID): Message!
 	editMessage(id: ID!, text: String!): Message!
 	deleteMessage(id: ID!): Message!
@@ -621,6 +636,21 @@ func (ec *executionContext) field_Mutation_createChat_args(ctx context.Context, 
 		}
 	}
 	args["userIds"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteChat_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int64
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2int64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -1501,6 +1531,48 @@ func (ec *executionContext) _Mutation_createChat(ctx context.Context, field grap
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().CreateChat(rctx, args["userIds"].([]int64))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Chat)
+	fc.Result = res
+	return ec.marshalNChat2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChat(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteChat(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteChat_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteChat(rctx, args["id"].(int64))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3443,6 +3515,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "createChat":
 			out.Values[i] = ec._Mutation_createChat(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteChat":
+			out.Values[i] = ec._Mutation_deleteChat(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

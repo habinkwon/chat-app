@@ -35,6 +35,17 @@ func (r *ChatMessage) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
+func (r *ChatMessage) DeleteAll(ctx context.Context, chatId int64) error {
+	_, err := r.DB.ExecContext(ctx, `
+	DELETE FROM chat_messages
+	WHERE chat_id = ?
+	`, chatId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *ChatMessage) Edit(ctx context.Context, id int64, content string, tm time.Time) error {
 	_, err := r.DB.ExecContext(ctx, `
 	UPDATE chat_messages

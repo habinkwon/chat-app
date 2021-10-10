@@ -50,6 +50,16 @@ func (r *mutationResolver) CreateChat(ctx context.Context, userIds []int64) (*mo
 	return chat, nil
 }
 
+func (r *mutationResolver) DeleteChat(ctx context.Context, id int64) (*model.Chat, error) {
+	if err := r.ChatSvc.DeleteChat(ctx, id); err != nil {
+		return nil, err
+	}
+	chat := &model.Chat{
+		ID: id,
+	}
+	return chat, nil
+}
+
 func (r *mutationResolver) PostMessage(ctx context.Context, chatID int64, text string, replyTo *int64) (*model.Message, error) {
 	id, err := r.ChatSvc.PostMessage(ctx, chatID, text)
 	if err != nil {

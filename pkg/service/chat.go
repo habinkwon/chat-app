@@ -53,6 +53,35 @@ func (s *Chat) CreateChat(ctx context.Context, userIds []int64) (id int64, err e
 	return
 }
 
+func (s *Chat) DeleteChat(ctx context.Context, id int64) error {
+	userId := auth.UserId(ctx)
+	if userId == 0 {
+		return auth.ErrNoAuth
+	}
+
+	if ok, err := s.ChatMemberRepo.Exists(ctx, id, userId); err != nil {
+		return err
+	} else if !ok {
+		return auth.ErrPerm
+	}
+
+	if err := s.ChatMemberRepo.Delete(ctx, id, userId); err != nil {
+		return err
+	}
+
+	if ok, err := s.ChatMemberRepo.Exists(ctx, id, 0); err != nil {
+		return err
+	} else if !ok {
+		if err := s.ChatRepo.Delete(ctx, id); err != nil {
+			log.Print(err)
+		}
+		if err := s.ChatMessageRepo.DeleteAll(ctx, id); err != nil {
+			log.Print(err)
+		}
+	}
+	return nil
+}
+
 func (s *Chat) GetChat(ctx context.Context, id int64) (*model.Chat, error) {
 	userId := auth.UserId(ctx)
 	if userId == 0 {

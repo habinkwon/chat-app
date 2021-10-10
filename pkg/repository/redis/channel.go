@@ -31,6 +31,7 @@ func (r *Channel) SendEvent(ctx context.Context, userIds []int64, e *model.ChatE
 func (r *Channel) StreamEvents(ctx context.Context, userId int64, c chan *model.ChatEvent) (err error) {
 	channel := fmt.Sprintf("chat_events:%d", userId)
 	sub := r.Redis.Subscribe(ctx, channel)
+	defer sub.Close()
 	for {
 		msg, err := sub.ReceiveMessage(ctx)
 		if err != nil {

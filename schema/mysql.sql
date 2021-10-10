@@ -35,3 +35,5 @@ CREATE TABLE IF NOT EXISTS chat_messages (
 	edited_at DATETIME
 	-- FOREIGN KEY (chat_id, reply_to) REFERENCES chat_messages (chat_id, id) ON DELETE SET NULL
 );
+
+ALTER TABLE chat_messages ADD INDEX (chat_id);
