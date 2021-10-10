@@ -13,7 +13,7 @@ type Mutation {
 }
 
 type Subscription {
-	chatEvent(chatId: ID!): ChatEvent!
+	chatEvent(userId: ID!): ChatEvent!
 }
 
 scalar Time
@@ -39,7 +39,7 @@ type Chat {
 type Message {
 	id: ID!
 	type: MessageType!
-	text: String!
+	content: String!
 	event: String!
 	sender: User
 	replyTo: Message
@@ -55,6 +55,7 @@ enum MessageType {
 
 type ChatEvent {
 	type: ChatEventType!
+	chatId: ID!
 	message: Message
 }
 

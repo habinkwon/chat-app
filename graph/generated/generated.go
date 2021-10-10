@@ -60,11 +60,13 @@ type ComplexityRoot struct {
 	}
 
 	ChatEvent struct {
+		ChatID  func(childComplexity int) int
 		Message func(childComplexity int) int
 		Type    func(childComplexity int) int
 	}
 
 	Message struct {
+		Content   func(childComplexity int) int
 		CreatedAt func(childComplexity int) int
 		EditedAt  func(childComplexity int) int
 		Event     func(childComplexity int) int
@@ -72,7 +74,6 @@ type ComplexityRoot struct {
 		Replies   func(childComplexity int) int
 		ReplyTo   func(childComplexity int) int
 		Sender    func(childComplexity int) int
-		Text      func(childComplexity int) int
 		Type      func(childComplexity int) int
 	}
 
@@ -91,7 +92,7 @@ type ComplexityRoot struct {
 	}
 
 	Subscription struct {
-		ChatEvent func(childComplexity int, chatID int64) int
+		ChatEvent func(childComplexity int, userID int64) int
 	}
 
 	User struct {
@@ -126,7 +127,7 @@ type QueryResolver interface {
 	Chats(ctx context.Context, first *int, after *int64) ([]*model.Chat, error)
 }
 type SubscriptionResolver interface {
-	ChatEvent(ctx context.Context, chatID int64) (<-chan *model.ChatEvent, error)
+	ChatEvent(ctx context.Context, userID int64) (<-chan *model.ChatEvent, error)
 }
 
 type executableSchema struct {
@@ -203,6 +204,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Chat.Name(childComplexity), true
 
+	case "ChatEvent.chatId":
+		if e.complexity.ChatEvent.ChatID == nil {
+			break
+		}
+
+		return e.complexity.ChatEvent.ChatID(childComplexity), true
+
 	case "ChatEvent.message":
 		if e.complexity.ChatEvent.Message == nil {
 			break
@@ -216,6 +224,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ChatEvent.Type(childComplexity), true
+
+	case "Message.content":
+		if e.complexity.Message.Content == nil {
+			break
+		}
+
+		return e.complexity.Message.Content(childComplexity), true
 
 	case "Message.createdAt":
 		if e.complexity.Message.CreatedAt == nil {
@@ -265,13 +280,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Message.Sender(childComplexity), true
-
-	case "Message.text":
-		if e.complexity.Message.Text == nil {
-			break
-		}
-
-		return e.complexity.Message.Text(childComplexity), true
 
 	case "Message.type":
 		if e.complexity.Message.Type == nil {
@@ -381,7 +389,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Subscription.ChatEvent(childComplexity, args["chatId"].(int64)), true
+		return e.complexity.Subscription.ChatEvent(childComplexity, args["userId"].(int64)), true
 
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
@@ -514,7 +522,7 @@ type Mutation {
 }
 
 type Subscription {
-	chatEvent(chatId: ID!): ChatEvent!
+	chatEvent(userId: ID!): ChatEvent!
 }
 
 scalar Time
@@ -540,7 +548,7 @@ type Chat {
 type Message {
 	id: ID!
 	type: MessageType!
-	text: String!
+	content: String!
 	event: String!
 	sender: User
 	replyTo: Message
@@ -556,6 +564,7 @@ enum MessageType {
 
 type ChatEvent {
 	type: ChatEventType!
+	chatId: ID!
 	message: Message
 }
 
@@ -789,14 +798,14 @@ func (ec *executionContext) field_Subscription_chatEvent_args(ctx context.Contex
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int64
-	if tmp, ok := rawArgs["chatId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("chatId"))
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
 		arg0, err = ec.unmarshalNID2int64(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["chatId"] = arg0
+	args["userId"] = arg0
 	return args, nil
 }
 
@@ -1129,6 +1138,41 @@ func (ec *executionContext) _ChatEvent_type(ctx context.Context, field graphql.C
 	return ec.marshalNChatEventType2githubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChatEventType(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _ChatEvent_chatId(ctx context.Context, field graphql.CollectedField, obj *model.ChatEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ChatEvent",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ChatID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNID2int64(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ChatEvent_message(ctx context.Context, field graphql.CollectedField, obj *model.ChatEvent) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1231,7 +1275,7 @@ func (ec *executionContext) _Message_type(ctx context.Context, field graphql.Col
 	return ec.marshalNMessageType2githubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessageType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Message_text(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
+func (ec *executionContext) _Message_content(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1249,7 +1293,7 @@ func (ec *executionContext) _Message_text(ctx context.Context, field graphql.Col
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Text, nil
+		return obj.Content, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1886,7 +1930,7 @@ func (ec *executionContext) _Subscription_chatEvent(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Subscription().ChatEvent(rctx, args["chatId"].(int64))
+		return ec.resolvers.Subscription().ChatEvent(rctx, args["userId"].(int64))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3315,6 +3359,11 @@ func (ec *executionContext) _ChatEvent(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "chatId":
+			out.Values[i] = ec._ChatEvent_chatId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "message":
 			out.Values[i] = ec._ChatEvent_message(ctx, field, obj)
 		default:
@@ -3349,8 +3398,8 @@ func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "text":
-			out.Values[i] = ec._Message_text(ctx, field, obj)
+		case "content":
+			out.Values[i] = ec._Message_content(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}

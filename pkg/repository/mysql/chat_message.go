@@ -13,11 +13,11 @@ type ChatMessage struct {
 	DB *sql.DB
 }
 
-func (r *ChatMessage) Add(ctx context.Context, id, chatId int64, content string, userId int64, tm time.Time) error {
+func (r *ChatMessage) Add(ctx context.Context, chatId int64, m *model.Message) error {
 	_, err := r.DB.ExecContext(ctx, `
 	INSERT INTO chat_messages (id, chat_id, content, sender_id, created_at)
 	VALUES (?, ?, ?, ?, ?)
-	`, id, chatId, content, userId, tm)
+	`, m.ID, chatId, m.Content, m.SenderID, m.CreatedAt)
 	if err != nil {
 		return err
 	}
@@ -47,16 +47,16 @@ func (r *ChatMessage) Edit(ctx context.Context, id int64, content string, tm tim
 	return nil
 }
 
-func (r *ChatMessage) GetSenderId(ctx context.Context, id int64) (senderId int64, err error) {
+func (r *ChatMessage) GetMetadata(ctx context.Context, id int64) (chatId, senderId int64, err error) {
 	err = r.DB.QueryRowContext(ctx, `
-	SELECT sender_id
+	SELECT chat_id, sender_id
 	FROM chat_messages
 	WHERE id = ?
-	`, id).Scan(&senderId)
+	`, id).Scan(&chatId, &senderId)
 	if err == sql.ErrNoRows {
-		return 0, nil
+		return 0, 0, nil
 	} else if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 	return
 }
@@ -90,7 +90,7 @@ func (r *ChatMessage) List(ctx context.Context, chatId int64, first int, after i
 		}
 		messages = append(messages, &model.Message{
 			ID:        id,
-			Text:      content.String,
+			Content:   content.String,
 			SenderID:  senderId,
 			CreatedAt: createdAt,
 			EditedAt:  &editedAt.Time,

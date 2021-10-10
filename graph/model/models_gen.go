@@ -11,6 +11,7 @@ import (
 
 type ChatEvent struct {
 	Type    ChatEventType `json:"type"`
+	ChatID  int64         `json:"chatId"`
 	Message *Message      `json:"message"`
 }
 

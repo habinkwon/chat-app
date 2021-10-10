@@ -15,7 +15,7 @@ type Chat struct {
 type Message struct {
 	ID        int64       `json:"id"`
 	Type      MessageType `json:"type"`
-	Text      string      `json:"text"`
+	Content   string      `json:"content"`
 	Event     string      `json:"event"`
 	SenderID  int64       `json:"sender"`
 	ReplyToID int64       `json:"replyTo"`

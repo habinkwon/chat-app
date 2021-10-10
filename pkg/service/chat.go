@@ -3,19 +3,22 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/neomarica/undergraduate-project/graph/model"
 	"github.com/neomarica/undergraduate-project/pkg/middleware/auth"
 	"github.com/neomarica/undergraduate-project/pkg/repository/mysql"
+	"github.com/neomarica/undergraduate-project/pkg/repository/redis"
 )
 
 type Chat struct {
+	IDNode          *snowflake.Node
 	ChatRepo        *mysql.Chat
 	ChatMemberRepo  *mysql.ChatMember
 	ChatMessageRepo *mysql.ChatMessage
-	IDNode          *snowflake.Node
+	ChannelRepo     *redis.Channel
 }
 
 func (s *Chat) CreateChat(ctx context.Context, userIds []int64) (id int64, err error) {
@@ -71,15 +74,31 @@ func (s *Chat) PostMessage(ctx context.Context, chatId int64, content string) (i
 	if userId == 0 {
 		return 0, auth.ErrNoAuth
 	}
-	if ok, err := s.ChatMemberRepo.Exists(ctx, chatId, userId); err != nil {
-		return 0, err
-	} else if !ok {
+
+	memberIds, err := s.ChatMemberRepo.Get(ctx, chatId)
+	if err != nil {
+		return
+	} else if !containsInt64(memberIds, userId) {
 		return 0, auth.ErrPerm
 	}
-	id = s.IDNode.Generate().Int64()
-	now := time.Now()
-	if err := s.ChatMessageRepo.Add(ctx, id, chatId, content, userId, now); err != nil {
+
+	m := &model.Message{
+		ID:        s.IDNode.Generate().Int64(),
+		Content:   content,
+		SenderID:  userId,
+		CreatedAt: time.Now(),
+	}
+	if err := s.ChatMessageRepo.Add(ctx, chatId, m); err != nil {
 		return 0, err
+	}
+
+	e := &model.ChatEvent{
+		Type:    model.ChatEventTypeMessagePosted,
+		ChatID:  chatId,
+		Message: m,
+	}
+	if err := s.ChannelRepo.SendEvent(ctx, memberIds, e); err != nil {
+		log.Print(err)
 	}
 	return
 }
@@ -89,13 +108,37 @@ func (s *Chat) DeleteMessage(ctx context.Context, id int64) error {
 	if userId == 0 {
 		return auth.ErrNoAuth
 	}
-	if senderId, err := s.ChatMessageRepo.GetSenderId(ctx, id); err != nil {
+
+	chatId, senderId, err := s.ChatMessageRepo.GetMetadata(ctx, id)
+	if err != nil {
 		return err
 	} else if senderId != userId {
 		return auth.ErrPerm
 	}
+
+	memberIds, err := s.ChatMemberRepo.Get(ctx, chatId)
+	if err != nil {
+		return err
+	} else if !containsInt64(memberIds, userId) {
+		return auth.ErrPerm
+	}
+
 	if err := s.ChatMessageRepo.Delete(ctx, id); err != nil {
 		return err
+	}
+
+	now := time.Now()
+	e := &model.ChatEvent{
+		Type:   model.ChatEventTypeMessageDeleted,
+		ChatID: chatId,
+		Message: &model.Message{
+			ID:       id,
+			SenderID: senderId,
+			EditedAt: &now,
+		},
+	}
+	if err := s.ChannelRepo.SendEvent(ctx, memberIds, e); err != nil {
+		log.Print(err)
 	}
 	return nil
 }
@@ -105,14 +148,38 @@ func (s *Chat) EditMessage(ctx context.Context, id int64, content string) error 
 	if userId == 0 {
 		return auth.ErrNoAuth
 	}
-	if senderId, err := s.ChatMessageRepo.GetSenderId(ctx, id); err != nil {
+
+	chatId, senderId, err := s.ChatMessageRepo.GetMetadata(ctx, id)
+	if err != nil {
 		return err
 	} else if senderId != userId {
 		return auth.ErrPerm
 	}
+
+	memberIds, err := s.ChatMemberRepo.Get(ctx, chatId)
+	if err != nil {
+		return err
+	} else if !containsInt64(memberIds, userId) {
+		return auth.ErrPerm
+	}
+
 	now := time.Now()
 	if err := s.ChatMessageRepo.Edit(ctx, id, content, now); err != nil {
 		return err
+	}
+
+	e := &model.ChatEvent{
+		Type:   model.ChatEventTypeMessageEdited,
+		ChatID: chatId,
+		Message: &model.Message{
+			ID:       id,
+			Content:  content,
+			SenderID: senderId,
+			EditedAt: &now,
+		},
+	}
+	if err := s.ChannelRepo.SendEvent(ctx, memberIds, e); err != nil {
+		log.Print(err)
 	}
 	return nil
 }
@@ -123,4 +190,24 @@ func (s *Chat) ListMessages(ctx context.Context, chatId int64, first int, after 
 		return nil, auth.ErrNoAuth
 	}
 	return s.ChatMessageRepo.List(ctx, chatId, first, after, desc)
+}
+
+func (s *Chat) ReceiveEvents(ctx context.Context, userID int64) (<-chan *model.ChatEvent, error) {
+	c := make(chan *model.ChatEvent, 1)
+	go func() {
+		defer close(c)
+		if err := s.ChannelRepo.StreamEvents(ctx, userID, c); err != nil {
+			log.Print(err)
+		}
+	}()
+	return c, nil
+}
+
+func containsInt64(s []int64, v int64) bool {
+	for _, e := range s {
+		if v == e {
+			return true
+		}
+	}
+	return false
 }

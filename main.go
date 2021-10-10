@@ -20,7 +20,8 @@ import (
 	"github.com/neomarica/undergraduate-project/graph"
 	"github.com/neomarica/undergraduate-project/graph/generated"
 	"github.com/neomarica/undergraduate-project/pkg/middleware/auth"
-	"github.com/neomarica/undergraduate-project/pkg/repository/mysql"
+	mysqlrepo "github.com/neomarica/undergraduate-project/pkg/repository/mysql"
+	redisrepo "github.com/neomarica/undergraduate-project/pkg/repository/redis"
 	"github.com/neomarica/undergraduate-project/pkg/service"
 	"github.com/rs/cors"
 )
@@ -62,10 +63,11 @@ func main() {
 	resolver := &graph.Resolver{
 		UserSvc: &service.User{},
 		ChatSvc: &service.Chat{
-			ChatRepo:        &mysql.Chat{DB: db},
-			ChatMemberRepo:  &mysql.ChatMember{DB: db},
-			ChatMessageRepo: &mysql.ChatMessage{DB: db},
 			IDNode:          idNode,
+			ChatRepo:        &mysqlrepo.Chat{DB: db},
+			ChatMemberRepo:  &mysqlrepo.ChatMember{DB: db},
+			ChatMessageRepo: &mysqlrepo.ChatMessage{DB: db},
+			ChannelRepo:     &redisrepo.Channel{Redis: rdb},
 		},
 	}
 	hs := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))

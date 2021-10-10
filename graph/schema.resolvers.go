@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-	"time"
 
 	"github.com/neomarica/undergraduate-project/graph/generated"
 	"github.com/neomarica/undergraduate-project/graph/model"
@@ -94,24 +93,8 @@ func (r *queryResolver) Chats(ctx context.Context, first *int, after *int64) ([]
 	return r.ChatSvc.ListChats(ctx, util.IntOr(first, 10), util.Int64Or(after, 0))
 }
 
-func (r *subscriptionResolver) ChatEvent(ctx context.Context, chatID int64) (<-chan *model.ChatEvent, error) {
-	ch := make(chan *model.ChatEvent)
-	go func() {
-		defer close(ch)
-		t := time.NewTicker(time.Second * 5)
-		defer t.Stop()
-		for {
-			select {
-			case <-t.C:
-				ch <- &model.ChatEvent{
-					Type: model.ChatEventTypeMessagePosted,
-				}
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
-	return ch, nil
+func (r *subscriptionResolver) ChatEvent(ctx context.Context, userID int64) (<-chan *model.ChatEvent, error) {
+	return r.ChatSvc.ReceiveEvents(ctx, userID)
 }
 
 // Chat returns generated.ChatResolver implementation.
