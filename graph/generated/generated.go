@@ -39,6 +39,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Chat() ChatResolver
+	ChatEvent() ChatEventResolver
 	Message() MessageResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
@@ -108,6 +109,9 @@ type ChatResolver interface {
 	Members(ctx context.Context, obj *model.Chat) ([]*model.User, error)
 	Messages(ctx context.Context, obj *model.Chat, first *int, after *int64, desc *bool) ([]*model.Message, error)
 	CreatedBy(ctx context.Context, obj *model.Chat) (*model.User, error)
+}
+type ChatEventResolver interface {
+	Message(ctx context.Context, obj *model.ChatEvent) (*model.Message, error)
 }
 type MessageResolver interface {
 	Sender(ctx context.Context, obj *model.Message) (*model.User, error)
@@ -1168,14 +1172,14 @@ func (ec *executionContext) _ChatEvent_message(ctx context.Context, field graphq
 		Object:     "ChatEvent",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Message, nil
+		return ec.resolvers.ChatEvent().Message(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3348,15 +3352,24 @@ func (ec *executionContext) _ChatEvent(ctx context.Context, sel ast.SelectionSet
 		case "type":
 			out.Values[i] = ec._ChatEvent_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "chatId":
 			out.Values[i] = ec._ChatEvent_chatId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "message":
-			out.Values[i] = ec._ChatEvent_message(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ChatEvent_message(ctx, field, obj)
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

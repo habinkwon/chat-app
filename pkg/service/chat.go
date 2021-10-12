@@ -135,21 +135,25 @@ func (s *Chat) PostMessage(ctx context.Context, chatId int64, content string, re
 		}
 	}
 
+	now := time.Now()
 	m := &model.Message{
 		ID:        s.IDNode.Generate().Int64(),
 		Content:   content,
 		SenderID:  userId,
 		ReplyToID: replyTo,
-		CreatedAt: time.Now(),
+		CreatedAt: now,
 	}
 	if err := s.ChatMessageRepo.Add(ctx, chatId, m); err != nil {
 		return 0, err
 	}
 
 	e := &model.ChatEvent{
-		Type:    model.ChatEventTypeMessagePosted,
-		ChatID:  chatId,
-		Message: m,
+		Type:      model.ChatEventTypeMessagePosted,
+		ChatID:    chatId,
+		MessageID: m.ID,
+		Content:   content,
+		SenderID:  userId,
+		CreatedAt: now,
 	}
 	if err := s.ChannelRepo.SendEvent(ctx, memberIds, e); err != nil {
 		log.Print(err)
@@ -183,13 +187,11 @@ func (s *Chat) DeleteMessage(ctx context.Context, id int64) error {
 
 	now := time.Now()
 	e := &model.ChatEvent{
-		Type:   model.ChatEventTypeMessageDeleted,
-		ChatID: chatId,
-		Message: &model.Message{
-			ID:       id,
-			SenderID: senderId,
-			EditedAt: &now,
-		},
+		Type:      model.ChatEventTypeMessageDeleted,
+		ChatID:    chatId,
+		MessageID: id,
+		SenderID:  senderId,
+		CreatedAt: now,
 	}
 	if err := s.ChannelRepo.SendEvent(ctx, memberIds, e); err != nil {
 		log.Print(err)
@@ -223,14 +225,12 @@ func (s *Chat) EditMessage(ctx context.Context, id int64, content string) error 
 	}
 
 	e := &model.ChatEvent{
-		Type:   model.ChatEventTypeMessageEdited,
-		ChatID: chatId,
-		Message: &model.Message{
-			ID:       id,
-			Content:  content,
-			SenderID: senderId,
-			EditedAt: &now,
-		},
+		Type:      model.ChatEventTypeMessageEdited,
+		ChatID:    chatId,
+		MessageID: id,
+		Content:   content,
+		SenderID:  senderId,
+		CreatedAt: now,
 	}
 	if err := s.ChannelRepo.SendEvent(ctx, memberIds, e); err != nil {
 		log.Print(err)

@@ -8,6 +8,7 @@ import (
 
 	"github.com/neomarica/undergraduate-project/graph/generated"
 	"github.com/neomarica/undergraduate-project/graph/model"
+	"github.com/neomarica/undergraduate-project/pkg/middleware/auth"
 	"github.com/neomarica/undergraduate-project/pkg/util"
 )
 
@@ -25,6 +26,16 @@ func (r *chatResolver) Messages(ctx context.Context, obj *model.Chat, first *int
 
 func (r *chatResolver) CreatedBy(ctx context.Context, obj *model.Chat) (*model.User, error) {
 	return r.UserSvc.GetUser(ctx, obj.CreatorID)
+}
+
+func (r *chatEventResolver) Message(ctx context.Context, obj *model.ChatEvent) (*model.Message, error) {
+	m := &model.Message{
+		ID:       obj.MessageID,
+		Content:  obj.Content,
+		SenderID: obj.SenderID,
+		EditedAt: &obj.CreatedAt,
+	}
+	return m, nil
 }
 
 func (r *messageResolver) Sender(ctx context.Context, obj *model.Message) (*model.User, error) {
@@ -107,11 +118,15 @@ func (r *queryResolver) Chats(ctx context.Context, first *int, after *int64) ([]
 }
 
 func (r *subscriptionResolver) ChatEvent(ctx context.Context, userID int64) (<-chan *model.ChatEvent, error) {
+	auth.SetUserId(ctx, userID)
 	return r.ChatSvc.ReceiveEvents(ctx, userID)
 }
 
 // Chat returns generated.ChatResolver implementation.
 func (r *Resolver) Chat() generated.ChatResolver { return &chatResolver{r} }
+
+// ChatEvent returns generated.ChatEventResolver implementation.
+func (r *Resolver) ChatEvent() generated.ChatEventResolver { return &chatEventResolver{r} }
 
 // Message returns generated.MessageResolver implementation.
 func (r *Resolver) Message() generated.MessageResolver { return &messageResolver{r} }
@@ -126,6 +141,7 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
 
 type chatResolver struct{ *Resolver }
+type chatEventResolver struct{ *Resolver }
 type messageResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

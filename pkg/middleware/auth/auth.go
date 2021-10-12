@@ -12,27 +12,36 @@ var (
 	ErrPerm   = errors.New("operation not permitted")
 )
 
-type userIdKey struct{}
+type AuthInfo struct {
+	UserId int64
+}
 
 func UserId(ctx context.Context) int64 {
-	userId, _ := ctx.Value(userIdKey{}).(int64)
-	return userId
+	return AuthInfoFrom(ctx).UserId
+}
+
+func SetUserId(ctx context.Context, userId int64) {
+	AuthInfoFrom(ctx).UserId = userId
+}
+
+type authInfoKey struct{}
+
+func AuthInfoFrom(ctx context.Context) *AuthInfo {
+	ai, _ := ctx.Value(authInfoKey{}).(*AuthInfo)
+	return ai
 }
 
 func Middleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var userId int64
+			ai := &AuthInfo{}
 			if id := r.Header.Get("user-id"); id != "" {
 				if id, err := strconv.ParseInt(id, 10, 64); err == nil {
-					userId = id
+					ai.UserId = id
 				}
 			}
-			if userId != 0 {
-				ctx := r.Context()
-				ctx = context.WithValue(ctx, userIdKey{}, userId)
-				r = r.WithContext(ctx)
-			}
+			ctx := context.WithValue(r.Context(), authInfoKey{}, ai)
+			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		})
 	}
