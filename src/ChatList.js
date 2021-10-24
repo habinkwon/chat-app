@@ -13,8 +13,9 @@ function ChatList({ setChatId }) {
 			}
 		}
 	`)
+
 	if (loading) return <p>Loading...</p>
-	if (error) return <p>{error.message}</p>
+	if (error) return <p>{error}</p>
 	return data.chats.map((chat) => (
 		<div key={chat.id} onClick={() => setChatId(chat.id)} className="cursor-pointer hover:bg-gray-300">
 			<div className="font-bold">{chat.name}</div>

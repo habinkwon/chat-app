@@ -11,9 +11,7 @@ function App() {
 				<div className="col-2">
 					<ChatList setChatId={setChatId} />
 				</div>
-				<div className="col">
-					<MessageList chatId={chatId} />
-				</div>
+				<div className="col">{chatId ? <MessageList chatId={chatId} /> : <p>Select a chat</p>}</div>
 			</div>
 		</div>
 	)

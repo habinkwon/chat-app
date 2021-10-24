@@ -3,7 +3,6 @@ package mysql
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/habinkwon/chat-app/graph/model"
@@ -117,17 +116,26 @@ func (r *ChatMessage) Get(ctx context.Context, id, userId int64) (message *model
 }
 
 func (r *ChatMessage) List(ctx context.Context, chatId int64, first int, after int64, desc bool) (messages []*model.Message, err error) {
-	order := "ASC"
-	if desc {
-		order = "DESC"
-	}
-	rows, err := r.DB.QueryContext(ctx, fmt.Sprintf(`
+	query := `
 	SELECT id, content, sender_id, reply_to, created_at, edited_at
 	FROM chat_messages
-	WHERE chat_id = ? AND id > ?
-	ORDER BY id %s
-	LIMIT ?
-	`, order), chatId, after, first)
+	WHERE chat_id = ?`
+	args := []interface{}{chatId}
+	if after != 0 {
+		dir := ">"
+		if desc {
+			dir = "<"
+		}
+		query += " AND id " + dir + " ?"
+		args = append(args, after)
+	}
+	query += " ORDER BY id"
+	if desc {
+		query += " DESC"
+	}
+	query += " LIMIT ?"
+	args = append(args, first)
+	rows, err := r.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
