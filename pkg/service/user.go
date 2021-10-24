@@ -5,6 +5,7 @@ import (
 
 	"github.com/habinkwon/chat-app/graph/model"
 	"github.com/habinkwon/chat-app/pkg/middleware/auth"
+	"github.com/habinkwon/chat-app/pkg/util"
 )
 
 type User struct {
@@ -18,7 +19,11 @@ func (s *User) GetUser(ctx context.Context, id int64) (*model.User, error) {
 	if id == 0 {
 		id = userId
 	}
-	return &model.User{ID: id}, nil
+	user := &model.User{
+		ID:   id,
+		Name: util.FormatID(id),
+	}
+	return user, nil
 }
 
 func (s *User) GetUsers(ctx context.Context, ids []int64) ([]*model.User, error) {

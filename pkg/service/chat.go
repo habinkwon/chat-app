@@ -88,7 +88,14 @@ func (s *Chat) GetChat(ctx context.Context, id int64) (*model.Chat, error) {
 	if userId == 0 {
 		return nil, auth.ErrNoAuth
 	}
-	return s.ChatRepo.Get(ctx, id, userId)
+	chat, err := s.ChatRepo.Get(ctx, id, userId)
+	if err != nil || chat == nil {
+		return nil, err
+	}
+	if chat.Name == "" {
+		chat.Name = util.FormatID(chat.ID)
+	}
+	return chat, nil
 }
 
 func (s *Chat) ListChats(ctx context.Context, first int, after int64) ([]*model.Chat, error) {
@@ -96,7 +103,16 @@ func (s *Chat) ListChats(ctx context.Context, first int, after int64) ([]*model.
 	if userId == 0 {
 		return nil, auth.ErrNoAuth
 	}
-	return s.ChatRepo.List(ctx, userId, first, after)
+	chats, err := s.ChatRepo.List(ctx, userId, first, after)
+	if err != nil {
+		return nil, err
+	}
+	for _, chat := range chats {
+		if chat.Name == "" {
+			chat.Name = util.FormatID(chat.ID)
+		}
+	}
+	return chats, nil
 }
 
 func (s *Chat) GetMemberIds(ctx context.Context, chatId int64) (memberIds []int64, err error) {

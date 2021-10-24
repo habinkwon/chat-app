@@ -9,6 +9,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.3
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/rs/cors v1.8.0
+	github.com/spaolacci/murmur3 v1.1.0
 	github.com/vektah/gqlparser/v2 v2.2.0
 )
 

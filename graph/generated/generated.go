@@ -944,7 +944,7 @@ func (ec *executionContext) _Chat_members(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.([]*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Chat_messages(ctx context.Context, field graphql.CollectedField, obj *model.Chat) (ret graphql.Marshaler) {
@@ -986,7 +986,7 @@ func (ec *executionContext) _Chat_messages(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.([]*model.Message)
 	fc.Result = res
-	return ec.marshalNMessage2ᚕᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessageᚄ(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚕᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessageᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Chat_createdBy(ctx context.Context, field graphql.CollectedField, obj *model.Chat) (ret graphql.Marshaler) {
@@ -1018,7 +1018,7 @@ func (ec *executionContext) _Chat_createdBy(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Chat_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Chat) (ret graphql.Marshaler) {
@@ -1123,7 +1123,7 @@ func (ec *executionContext) _ChatEvent_type(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(model.ChatEventType)
 	fc.Result = res
-	return ec.marshalNChatEventType2githubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChatEventType(ctx, field.Selections, res)
+	return ec.marshalNChatEventType2githubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChatEventType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ChatEvent_chatId(ctx context.Context, field graphql.CollectedField, obj *model.ChatEvent) (ret graphql.Marshaler) {
@@ -1190,7 +1190,7 @@ func (ec *executionContext) _ChatEvent_message(ctx context.Context, field graphq
 	}
 	res := resTmp.(*model.Message)
 	fc.Result = res
-	return ec.marshalOMessage2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
+	return ec.marshalOMessage2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Message_id(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
@@ -1260,7 +1260,7 @@ func (ec *executionContext) _Message_type(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(model.MessageType)
 	fc.Result = res
-	return ec.marshalNMessageType2githubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessageType(ctx, field.Selections, res)
+	return ec.marshalNMessageType2githubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessageType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Message_content(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
@@ -1362,7 +1362,7 @@ func (ec *executionContext) _Message_sender(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Message_replyTo(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
@@ -1394,7 +1394,7 @@ func (ec *executionContext) _Message_replyTo(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*model.Message)
 	fc.Result = res
-	return ec.marshalOMessage2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
+	return ec.marshalOMessage2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Message_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
@@ -1503,7 +1503,7 @@ func (ec *executionContext) _Mutation_createChat(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.Chat)
 	fc.Result = res
-	return ec.marshalNChat2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChat(ctx, field.Selections, res)
+	return ec.marshalNChat2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deleteChat(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1545,7 +1545,7 @@ func (ec *executionContext) _Mutation_deleteChat(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.Chat)
 	fc.Result = res
-	return ec.marshalNChat2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChat(ctx, field.Selections, res)
+	return ec.marshalNChat2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_postMessage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1587,7 +1587,7 @@ func (ec *executionContext) _Mutation_postMessage(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.Message)
 	fc.Result = res
-	return ec.marshalNMessage2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_editMessage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1629,7 +1629,7 @@ func (ec *executionContext) _Mutation_editMessage(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.Message)
 	fc.Result = res
-	return ec.marshalNMessage2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deleteMessage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1671,7 +1671,7 @@ func (ec *executionContext) _Mutation_deleteMessage(ctx context.Context, field g
 	}
 	res := resTmp.(*model.Message)
 	fc.Result = res
-	return ec.marshalNMessage2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1706,7 +1706,7 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1745,7 +1745,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_chat(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1784,7 +1784,7 @@ func (ec *executionContext) _Query_chat(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*model.Chat)
 	fc.Result = res
-	return ec.marshalOChat2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChat(ctx, field.Selections, res)
+	return ec.marshalOChat2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_chats(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1826,7 +1826,7 @@ func (ec *executionContext) _Query_chats(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]*model.Chat)
 	fc.Result = res
-	return ec.marshalNChat2ᚕᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChatᚄ(ctx, field.Selections, res)
+	return ec.marshalNChat2ᚕᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChatᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1946,7 +1946,7 @@ func (ec *executionContext) _Subscription_chatEvent(ctx context.Context, field g
 			w.Write([]byte{'{'})
 			graphql.MarshalString(field.Alias).MarshalGQL(w)
 			w.Write([]byte{':'})
-			ec.marshalNChatEvent2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChatEvent(ctx, field.Selections, res).MarshalGQL(w)
+			ec.marshalNChatEvent2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChatEvent(ctx, field.Selections, res).MarshalGQL(w)
 			w.Write([]byte{'}'})
 		})
 	}
@@ -4270,11 +4270,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNChat2githubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChat(ctx context.Context, sel ast.SelectionSet, v model.Chat) graphql.Marshaler {
+func (ec *executionContext) marshalNChat2githubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChat(ctx context.Context, sel ast.SelectionSet, v model.Chat) graphql.Marshaler {
 	return ec._Chat(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNChat2ᚕᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChatᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Chat) graphql.Marshaler {
+func (ec *executionContext) marshalNChat2ᚕᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChatᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Chat) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4298,7 +4298,7 @@ func (ec *executionContext) marshalNChat2ᚕᚖgithubᚗcomᚋneomaricaᚋunderg
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNChat2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChat(ctx, sel, v[i])
+			ret[i] = ec.marshalNChat2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChat(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4318,7 +4318,7 @@ func (ec *executionContext) marshalNChat2ᚕᚖgithubᚗcomᚋneomaricaᚋunderg
 	return ret
 }
 
-func (ec *executionContext) marshalNChat2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChat(ctx context.Context, sel ast.SelectionSet, v *model.Chat) graphql.Marshaler {
+func (ec *executionContext) marshalNChat2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChat(ctx context.Context, sel ast.SelectionSet, v *model.Chat) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4328,11 +4328,11 @@ func (ec *executionContext) marshalNChat2ᚖgithubᚗcomᚋneomaricaᚋundergrad
 	return ec._Chat(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNChatEvent2githubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChatEvent(ctx context.Context, sel ast.SelectionSet, v model.ChatEvent) graphql.Marshaler {
+func (ec *executionContext) marshalNChatEvent2githubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChatEvent(ctx context.Context, sel ast.SelectionSet, v model.ChatEvent) graphql.Marshaler {
 	return ec._ChatEvent(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNChatEvent2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChatEvent(ctx context.Context, sel ast.SelectionSet, v *model.ChatEvent) graphql.Marshaler {
+func (ec *executionContext) marshalNChatEvent2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChatEvent(ctx context.Context, sel ast.SelectionSet, v *model.ChatEvent) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4342,13 +4342,13 @@ func (ec *executionContext) marshalNChatEvent2ᚖgithubᚗcomᚋneomaricaᚋunde
 	return ec._ChatEvent(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNChatEventType2githubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChatEventType(ctx context.Context, v interface{}) (model.ChatEventType, error) {
+func (ec *executionContext) unmarshalNChatEventType2githubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChatEventType(ctx context.Context, v interface{}) (model.ChatEventType, error) {
 	var res model.ChatEventType
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNChatEventType2githubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChatEventType(ctx context.Context, sel ast.SelectionSet, v model.ChatEventType) graphql.Marshaler {
+func (ec *executionContext) marshalNChatEventType2githubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChatEventType(ctx context.Context, sel ast.SelectionSet, v model.ChatEventType) graphql.Marshaler {
 	return v
 }
 
@@ -4403,11 +4403,11 @@ func (ec *executionContext) marshalNID2ᚕint64ᚄ(ctx context.Context, sel ast.
 	return ret
 }
 
-func (ec *executionContext) marshalNMessage2githubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessage(ctx context.Context, sel ast.SelectionSet, v model.Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2githubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessage(ctx context.Context, sel ast.SelectionSet, v model.Message) graphql.Marshaler {
 	return ec._Message(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNMessage2ᚕᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessageᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2ᚕᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessageᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Message) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4431,7 +4431,7 @@ func (ec *executionContext) marshalNMessage2ᚕᚖgithubᚗcomᚋneomaricaᚋund
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNMessage2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessage(ctx, sel, v[i])
+			ret[i] = ec.marshalNMessage2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessage(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4451,7 +4451,7 @@ func (ec *executionContext) marshalNMessage2ᚕᚖgithubᚗcomᚋneomaricaᚋund
 	return ret
 }
 
-func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessage(ctx context.Context, sel ast.SelectionSet, v *model.Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessage(ctx context.Context, sel ast.SelectionSet, v *model.Message) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4461,13 +4461,13 @@ func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋneomaricaᚋunderg
 	return ec._Message(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNMessageType2githubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessageType(ctx context.Context, v interface{}) (model.MessageType, error) {
+func (ec *executionContext) unmarshalNMessageType2githubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessageType(ctx context.Context, v interface{}) (model.MessageType, error) {
 	var res model.MessageType
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNMessageType2githubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessageType(ctx context.Context, sel ast.SelectionSet, v model.MessageType) graphql.Marshaler {
+func (ec *executionContext) marshalNMessageType2githubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessageType(ctx context.Context, sel ast.SelectionSet, v model.MessageType) graphql.Marshaler {
 	return v
 }
 
@@ -4501,11 +4501,11 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4529,7 +4529,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋneomaricaᚋunderg
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4549,7 +4549,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋneomaricaᚋunderg
 	return ret
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4842,7 +4842,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOChat2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐChat(ctx context.Context, sel ast.SelectionSet, v *model.Chat) graphql.Marshaler {
+func (ec *executionContext) marshalOChat2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐChat(ctx context.Context, sel ast.SelectionSet, v *model.Chat) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4881,7 +4881,7 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
-func (ec *executionContext) marshalOMessage2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐMessage(ctx context.Context, sel ast.SelectionSet, v *model.Message) graphql.Marshaler {
+func (ec *executionContext) marshalOMessage2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessage(ctx context.Context, sel ast.SelectionSet, v *model.Message) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4930,7 +4930,7 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋneomaricaᚋundergraduateᚑprojectᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

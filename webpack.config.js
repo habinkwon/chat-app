@@ -1,9 +1,11 @@
 const path = require('path')
 const fs = require('fs')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
-	entry: path.resolve(__dirname, 'index.js'),
+	entry: path.resolve(__dirname, 'src/index.js'),
 	output: {
 		path: path.resolve(__dirname, 'dist'),
 		filename: 'bundle.js',
@@ -12,7 +14,8 @@ module.exports = {
 		rules: [
 			{
 				test: /\.(js)$/,
-				exclude: /node_modules/,
+				include: path.resolve(__dirname, 'src'),
+				// exclude: /node_modules/,
 				use: {
 					loader: 'babel-loader',
 					options: {
@@ -20,14 +23,32 @@ module.exports = {
 					},
 				},
 			},
+			{
+				test: /\.css$/i,
+				include: path.resolve(__dirname, 'src'),
+				use: [MiniCssExtractPlugin.loader, 'css-loader'],
+			},
 		],
 	},
 	resolve: {
 		extensions: ['*', '.js'],
 	},
 	plugins: [
+		new MiniCssExtractPlugin({
+			filename: 'css/[name].css',
+			chunkFilename: 'styles.css',
+		}),
 		new HtmlWebpackPlugin({
-			template: path.resolve(__dirname, 'index.html'),
+			template: path.resolve(__dirname, 'src/index.html'),
+			filename: 'index.html',
+		}),
+		new CopyWebpackPlugin({
+			patterns: [
+				{
+					from: path.resolve(__dirname, 'static'),
+					to: 'static',
+				},
+			],
 		}),
 	],
 	devServer: {
