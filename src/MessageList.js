@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { gql, useApolloClient } from '@apollo/client'
+import { gql, useApolloClient, useSubscription } from '@apollo/client'
 
 export default function MessageList({ chatId }) {
 	const [messages, setMessages] = useState([])
@@ -40,10 +40,33 @@ export default function MessageList({ chatId }) {
 		setMessages((prevMessages) => [...messages, ...prevMessages])
 		setAfter(messages[0].id)
 	}
+	useEffect(() => fetchMessages(), [])
 
-	useEffect(() => {
-		fetchMessages()
-	}, [])
+	useSubscription(
+		gql`
+			subscription ChatEvent($userId: ID!) {
+				chatEvent(userId: $userId) {
+					type
+					chatId
+					message {
+						id
+						content
+						sender {
+							id
+							name
+						}
+						createdAt
+					}
+				}
+			}
+		`,
+		{
+			variables: { userId: 1 },
+			onSubscriptionData: ({ subscriptionData: { data } }) => {
+				console.log(data)
+			},
+		}
+	)
 
 	if (loading) return <p>Loading...</p>
 	if (error) return <p>{error}</p>

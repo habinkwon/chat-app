@@ -10,13 +10,18 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/bwmarrin/snowflake"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/websocket"
 	"github.com/habinkwon/chat-app/graph"
 	"github.com/habinkwon/chat-app/graph/generated"
 	"github.com/habinkwon/chat-app/pkg/middleware/auth"
@@ -70,17 +75,34 @@ func main() {
 			ChannelRepo:     &redisrepo.Channel{Redis: rdb},
 		},
 	}
-	hs := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
-	r := chi.NewRouter()
-	r.Use(cors.New(cors.Options{
+	s := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
+	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
-	}).Handler)
+	})
+	s.AddTransport(transport.Websocket{
+		Upgrader: websocket.Upgrader{
+			CheckOrigin: c.OriginAllowed,
+		},
+		KeepAlivePingInterval: 10 * time.Second,
+	})
+	s.AddTransport(transport.Options{})
+	s.AddTransport(transport.GET{})
+	s.AddTransport(transport.POST{})
+	s.AddTransport(transport.MultipartForm{})
+	s.SetQueryCache(lru.New(1000))
+	s.Use(extension.Introspection{})
+	s.Use(extension.AutomaticPersistedQuery{
+		Cache: lru.New(100),
+	})
+
+	r := chi.NewRouter()
+	r.Use(c.Handler)
 	r.Use(auth.Middleware())
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	r.Handle("/query", hs)
+	r.Handle("/query", s)
 
 	l, err := net.Listen("tcp", *listenAddr)
 	if err != nil {
@@ -88,19 +110,19 @@ func main() {
 	}
 	log.Printf("server listening on %s", *listenAddr)
 
-	srv := &http.Server{
+	hs := &http.Server{
 		Handler: r,
 	}
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		if err := srv.Serve(l); err != nil && err != http.ErrServerClosed {
+		if err := hs.Serve(l); err != nil && err != http.ErrServerClosed {
 			log.Print(fmt.Errorf("server error: %w", err))
 		}
 	}()
 	go func() {
 		<-ctx.Done()
-		if err := srv.Close(); err != nil {
+		if err := hs.Close(); err != nil {
 			log.Print(fmt.Errorf("error closing server: %w", err))
 		}
 	}()
