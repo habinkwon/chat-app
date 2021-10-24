@@ -72,7 +72,12 @@ func main() {
 	}
 	hs := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 	r := chi.NewRouter()
-	r.Use(cors.Default().Handler)
+	r.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{http.MethodGet, http.MethodPost},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	}).Handler)
 	r.Use(auth.Middleware())
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	r.Handle("/query", hs)
