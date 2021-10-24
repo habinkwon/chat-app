@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { gql, useApolloClient } from '@apollo/client'
 
-function MessageList({ chatId }) {
+export default function MessageList({ chatId }) {
 	const [messages, setMessages] = useState([])
 	const [after, setAfter] = useState(null)
 	const [more, setMore] = useState(true)
 
 	const client = useApolloClient()
-	const [loading, setLoading] = useState(true)
+	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState(null)
 
 	async function fetchMessages() {
@@ -66,5 +66,3 @@ function MessageList({ chatId }) {
 		</>
 	)
 }
-
-export default MessageList
