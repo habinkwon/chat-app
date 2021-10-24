@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/neomarica/undergraduate-project/graph/model"
-	"github.com/neomarica/undergraduate-project/pkg/middleware/auth"
+	"github.com/habinkwon/chat-app/graph/model"
+	"github.com/habinkwon/chat-app/pkg/middleware/auth"
 )
 
 type User struct {

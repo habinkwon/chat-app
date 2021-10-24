@@ -1,6 +1,6 @@
 package graph
 
-import "github.com/neomarica/undergraduate-project/pkg/service"
+import "github.com/habinkwon/chat-app/pkg/service"
 
 // This file will not be regenerated automatically.
 //

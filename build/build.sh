@@ -1,6 +1,6 @@
 #!/bin/bash
 APP=chat-server
-REPO=$GOSRC/undergraduate-project
+REPO=$GOSRC/chat-app
 
 cd $REPO
 go build -o build/$APP.out

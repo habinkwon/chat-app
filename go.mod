@@ -1,9 +1,9 @@
-module github.com/neomarica/undergraduate-project
+module github.com/habinkwon/chat-app
 
 go 1.17
 
 require (
-	github.com/99designs/gqlgen v0.14.1-0.20210922210101-d99982837597
+	github.com/99designs/gqlgen v0.14.1-0.20211020130656-7db941a56e74
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/go-chi/chi/v5 v5.0.4
 	github.com/go-redis/redis/v8 v8.11.3
@@ -13,10 +13,12 @@ require (
 )
 
 require (
-	github.com/agnivade/levenshtein v1.1.0 // indirect
+	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/hashicorp/golang-lru v0.5.0 // indirect
-	github.com/mitchellh/mapstructure v1.2.3 // indirect
+	github.com/hashicorp/golang-lru v0.5.4 // indirect
+	github.com/mitchellh/mapstructure v1.4.2 // indirect
+	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
+	golang.org/x/sys v0.0.0-20211023085530-d6a326fbbf70 // indirect
 )

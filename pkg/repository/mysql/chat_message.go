@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/neomarica/undergraduate-project/graph/model"
+	"github.com/habinkwon/chat-app/graph/model"
 )
 
 type ChatMessage struct {

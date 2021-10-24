@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/neomarica/undergraduate-project/graph/model"
+	"github.com/habinkwon/chat-app/graph/model"
 )
 
 type Chat struct {

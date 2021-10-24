@@ -7,7 +7,7 @@ import (
 	"log"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/neomarica/undergraduate-project/graph/model"
+	"github.com/habinkwon/chat-app/graph/model"
 )
 
 type Channel struct {

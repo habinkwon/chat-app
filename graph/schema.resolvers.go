@@ -6,10 +6,10 @@ package graph
 import (
 	"context"
 
-	"github.com/neomarica/undergraduate-project/graph/generated"
-	"github.com/neomarica/undergraduate-project/graph/model"
-	"github.com/neomarica/undergraduate-project/pkg/middleware/auth"
-	"github.com/neomarica/undergraduate-project/pkg/util"
+	"github.com/habinkwon/chat-app/graph/generated"
+	"github.com/habinkwon/chat-app/graph/model"
+	"github.com/habinkwon/chat-app/pkg/middleware/auth"
+	"github.com/habinkwon/chat-app/pkg/util"
 )
 
 func (r *chatResolver) Members(ctx context.Context, obj *model.Chat) ([]*model.User, error) {

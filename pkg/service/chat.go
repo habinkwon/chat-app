@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/bwmarrin/snowflake"
-	"github.com/neomarica/undergraduate-project/graph/model"
-	"github.com/neomarica/undergraduate-project/pkg/middleware/auth"
-	"github.com/neomarica/undergraduate-project/pkg/repository/mysql"
-	"github.com/neomarica/undergraduate-project/pkg/repository/redis"
-	"github.com/neomarica/undergraduate-project/pkg/util"
+	"github.com/habinkwon/chat-app/graph/model"
+	"github.com/habinkwon/chat-app/pkg/middleware/auth"
+	"github.com/habinkwon/chat-app/pkg/repository/mysql"
+	"github.com/habinkwon/chat-app/pkg/repository/redis"
+	"github.com/habinkwon/chat-app/pkg/util"
 )
 
 type Chat struct {

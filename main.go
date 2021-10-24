@@ -17,12 +17,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/neomarica/undergraduate-project/graph"
-	"github.com/neomarica/undergraduate-project/graph/generated"
-	"github.com/neomarica/undergraduate-project/pkg/middleware/auth"
-	mysqlrepo "github.com/neomarica/undergraduate-project/pkg/repository/mysql"
-	redisrepo "github.com/neomarica/undergraduate-project/pkg/repository/redis"
-	"github.com/neomarica/undergraduate-project/pkg/service"
+	"github.com/habinkwon/chat-app/graph"
+	"github.com/habinkwon/chat-app/graph/generated"
+	"github.com/habinkwon/chat-app/pkg/middleware/auth"
+	mysqlrepo "github.com/habinkwon/chat-app/pkg/repository/mysql"
+	redisrepo "github.com/habinkwon/chat-app/pkg/repository/redis"
+	"github.com/habinkwon/chat-app/pkg/service"
 	"github.com/rs/cors"
 )
 
