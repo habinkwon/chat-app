@@ -164,12 +164,15 @@ func (s *Chat) PostMessage(ctx context.Context, chatId int64, content string, re
 	}
 
 	e := &model.ChatEvent{
-		Type:      model.ChatEventTypeMessagePosted,
-		ChatID:    chatId,
-		MessageID: m.ID,
-		Content:   content,
-		SenderID:  userId,
-		CreatedAt: now,
+		Type:   model.ChatEventTypeMessagePosted,
+		ChatID: chatId,
+		Message: &model.Message{
+			ID:        m.ID,
+			Type:      model.MessageTypeMessage,
+			Content:   content,
+			SenderID:  userId,
+			CreatedAt: now,
+		},
 	}
 	if err := s.ChannelRepo.SendEvent(ctx, memberIds, e); err != nil {
 		log.Print(err)
@@ -203,11 +206,14 @@ func (s *Chat) DeleteMessage(ctx context.Context, id int64) error {
 
 	now := time.Now()
 	e := &model.ChatEvent{
-		Type:      model.ChatEventTypeMessageDeleted,
-		ChatID:    chatId,
-		MessageID: id,
-		SenderID:  senderId,
-		CreatedAt: now,
+		Type:   model.ChatEventTypeMessageDeleted,
+		ChatID: chatId,
+		Message: &model.Message{
+			ID:        id,
+			Type:      model.MessageTypeMessage,
+			SenderID:  senderId,
+			CreatedAt: now,
+		},
 	}
 	if err := s.ChannelRepo.SendEvent(ctx, memberIds, e); err != nil {
 		log.Print(err)
@@ -241,12 +247,15 @@ func (s *Chat) EditMessage(ctx context.Context, id int64, content string) error 
 	}
 
 	e := &model.ChatEvent{
-		Type:      model.ChatEventTypeMessageEdited,
-		ChatID:    chatId,
-		MessageID: id,
-		Content:   content,
-		SenderID:  senderId,
-		CreatedAt: now,
+		Type:   model.ChatEventTypeMessageEdited,
+		ChatID: chatId,
+		Message: &model.Message{
+			ID:        id,
+			Type:      model.MessageTypeMessage,
+			Content:   content,
+			SenderID:  senderId,
+			CreatedAt: now,
+		},
 	}
 	if err := s.ChannelRepo.SendEvent(ctx, memberIds, e); err != nil {
 		log.Print(err)

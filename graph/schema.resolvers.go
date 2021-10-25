@@ -28,17 +28,6 @@ func (r *chatResolver) CreatedBy(ctx context.Context, obj *model.Chat) (*model.U
 	return r.UserSvc.GetUser(ctx, obj.CreatorID)
 }
 
-func (r *chatEventResolver) Message(ctx context.Context, obj *model.ChatEvent) (*model.Message, error) {
-	m := &model.Message{
-		ID:        obj.MessageID,
-		Type:      model.MessageTypeMessage,
-		Content:   obj.Content,
-		SenderID:  obj.SenderID,
-		CreatedAt: obj.CreatedAt,
-	}
-	return m, nil
-}
-
 func (r *messageResolver) Sender(ctx context.Context, obj *model.Message) (*model.User, error) {
 	return r.UserSvc.GetUser(ctx, obj.SenderID)
 }
@@ -126,9 +115,6 @@ func (r *subscriptionResolver) ChatEvent(ctx context.Context, userID int64) (<-c
 // Chat returns generated.ChatResolver implementation.
 func (r *Resolver) Chat() generated.ChatResolver { return &chatResolver{r} }
 
-// ChatEvent returns generated.ChatEventResolver implementation.
-func (r *Resolver) ChatEvent() generated.ChatEventResolver { return &chatEventResolver{r} }
-
 // Message returns generated.MessageResolver implementation.
 func (r *Resolver) Message() generated.MessageResolver { return &messageResolver{r} }
 
@@ -142,7 +128,6 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
 
 type chatResolver struct{ *Resolver }
-type chatEventResolver struct{ *Resolver }
 type messageResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

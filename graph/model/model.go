@@ -20,12 +20,3 @@ type Message struct {
 	CreatedAt time.Time   `json:"createdAt"`
 	EditedAt  *time.Time  `json:"editedAt"`
 }
-
-type ChatEvent struct {
-	Type      ChatEventType `json:"type"`
-	ChatID    int64         `json:"chatId"`
-	MessageID int64         `json:"messageId"`
-	Content   string        `json:"content"`
-	SenderID  int64         `json:"senderId"`
-	CreatedAt time.Time     `json:"createdAt"`
-}

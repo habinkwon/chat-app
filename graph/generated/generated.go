@@ -39,7 +39,6 @@ type Config struct {
 
 type ResolverRoot interface {
 	Chat() ChatResolver
-	ChatEvent() ChatEventResolver
 	Message() MessageResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
@@ -109,9 +108,6 @@ type ChatResolver interface {
 	Members(ctx context.Context, obj *model.Chat) ([]*model.User, error)
 	Messages(ctx context.Context, obj *model.Chat, first *int, after *int64, desc *bool) ([]*model.Message, error)
 	CreatedBy(ctx context.Context, obj *model.Chat) (*model.User, error)
-}
-type ChatEventResolver interface {
-	Message(ctx context.Context, obj *model.ChatEvent) (*model.Message, error)
 }
 type MessageResolver interface {
 	Sender(ctx context.Context, obj *model.Message) (*model.User, error)
@@ -1172,14 +1168,14 @@ func (ec *executionContext) _ChatEvent_message(ctx context.Context, field graphq
 		Object:     "ChatEvent",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ChatEvent().Message(rctx, obj)
+		return obj.Message, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3393,7 +3389,7 @@ func (ec *executionContext) _ChatEvent(ctx context.Context, sel ast.SelectionSet
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "chatId":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -3403,25 +3399,15 @@ func (ec *executionContext) _ChatEvent(ctx context.Context, sel ast.SelectionSet
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "message":
-			field := field
-
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._ChatEvent_message(ctx, field, obj)
-				return res
+				return ec._ChatEvent_message(ctx, field, obj)
 			}
 
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
+			out.Values[i] = innerFunc(ctx)
 
-			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
