@@ -168,7 +168,6 @@ func (s *Chat) PostMessage(ctx context.Context, chatId int64, content string, re
 		ChatID: chatId,
 		Message: &model.Message{
 			ID:        m.ID,
-			Type:      model.MessageTypeMessage,
 			Content:   content,
 			SenderID:  userId,
 			CreatedAt: now,
@@ -210,7 +209,6 @@ func (s *Chat) DeleteMessage(ctx context.Context, id int64) error {
 		ChatID: chatId,
 		Message: &model.Message{
 			ID:        id,
-			Type:      model.MessageTypeMessage,
 			SenderID:  senderId,
 			CreatedAt: now,
 		},
@@ -251,7 +249,6 @@ func (s *Chat) EditMessage(ctx context.Context, id int64, content string) error 
 		ChatID: chatId,
 		Message: &model.Message{
 			ID:        id,
-			Type:      model.MessageTypeMessage,
 			Content:   content,
 			SenderID:  senderId,
 			CreatedAt: now,
@@ -288,4 +285,37 @@ func (s *Chat) ReceiveEvents(ctx context.Context, userID int64) (<-chan *model.C
 		}
 	}()
 	return c, nil
+}
+
+func (s *Chat) UserTyping(ctx context.Context, chatId int64) (*model.User, error) {
+	userId := auth.UserId(ctx)
+	if userId == 0 {
+		return nil, auth.ErrNoAuth
+	}
+
+	memberIds, err := s.ChatMemberRepo.Get(ctx, chatId)
+	if err != nil {
+		return nil, err
+	} else if !util.ContainsInt64(memberIds, userId) {
+		return nil, auth.ErrPerm
+	}
+
+	user := &model.User{
+		ID: userId,
+	}
+	e := &model.ChatEvent{
+		Type:   model.ChatEventTypeUserTyping,
+		ChatID: chatId,
+		User:   user,
+	}
+	for i, memberId := range memberIds {
+		if memberId == userId {
+			memberIds = append(memberIds[:i], memberIds[i+1:]...)
+			break
+		}
+	}
+	if err := s.ChannelRepo.SendEvent(ctx, memberIds, e); err != nil {
+		log.Print(err)
+	}
+	return user, nil
 }

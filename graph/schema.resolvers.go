@@ -28,6 +28,13 @@ func (r *chatResolver) CreatedBy(ctx context.Context, obj *model.Chat) (*model.U
 	return r.UserSvc.GetUser(ctx, obj.CreatorID)
 }
 
+func (r *chatEventResolver) User(ctx context.Context, obj *model.ChatEvent) (*model.User, error) {
+	if obj.User == nil {
+		return nil, nil
+	}
+	return r.UserSvc.GetUser(ctx, obj.User.ID)
+}
+
 func (r *messageResolver) Sender(ctx context.Context, obj *model.Message) (*model.User, error) {
 	return r.UserSvc.GetUser(ctx, obj.SenderID)
 }
@@ -37,10 +44,6 @@ func (r *messageResolver) ReplyTo(ctx context.Context, obj *model.Message) (*mod
 		return nil, nil
 	}
 	return r.ChatSvc.GetMessage(ctx, *obj.ReplyToID)
-}
-
-func (r *mutationResolver) SetAsOnline(ctx context.Context) (*model.User, error) {
-	return r.UserSvc.SetAsOnline(ctx)
 }
 
 func (r *mutationResolver) CreateChat(ctx context.Context, userIds []int64) (*model.Chat, error) {
@@ -95,6 +98,14 @@ func (r *mutationResolver) DeleteMessage(ctx context.Context, id int64) (*model.
 	return message, nil
 }
 
+func (r *mutationResolver) SetAsOnline(ctx context.Context) (*model.User, error) {
+	return r.UserSvc.SetAsOnline(ctx)
+}
+
+func (r *mutationResolver) UserTyping(ctx context.Context, chatID int64) (*model.User, error) {
+	return r.ChatSvc.UserTyping(ctx, chatID)
+}
+
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	return r.UserSvc.GetUser(ctx, 0)
 }
@@ -123,6 +134,9 @@ func (r *userResolver) Status(ctx context.Context, obj *model.User) (model.UserS
 // Chat returns generated.ChatResolver implementation.
 func (r *Resolver) Chat() generated.ChatResolver { return &chatResolver{r} }
 
+// ChatEvent returns generated.ChatEventResolver implementation.
+func (r *Resolver) ChatEvent() generated.ChatEventResolver { return &chatEventResolver{r} }
+
 // Message returns generated.MessageResolver implementation.
 func (r *Resolver) Message() generated.MessageResolver { return &messageResolver{r} }
 
@@ -139,6 +153,7 @@ func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subsc
 func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 
 type chatResolver struct{ *Resolver }
+type chatEventResolver struct{ *Resolver }
 type messageResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

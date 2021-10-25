@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { gql, useApolloClient, useSubscription } from '@apollo/client'
 
-export default function MessageList({ chatId }) {
+export default function MessageList({ chatId, userId }) {
 	const [messages, setMessages] = useState([])
 	const [after, setAfter] = useState(null)
 	const [more, setMore] = useState(true)
@@ -42,6 +42,13 @@ export default function MessageList({ chatId }) {
 	}
 	useEffect(() => fetchMessages(), [])
 
+	const [userTyping, setUserTyping] = useState(null)
+	useEffect(() => {
+		if (!userTyping) return
+		const timer = setTimeout(() => setUserTyping(null), 2000)
+		return () => clearTimeout(timer)
+	}, [userTyping])
+
 	useSubscription(
 		gql`
 			subscription ChatEvent($userId: ID!) {
@@ -57,15 +64,24 @@ export default function MessageList({ chatId }) {
 						}
 						createdAt
 					}
+					user {
+						name
+					}
 				}
 			}
 		`,
 		{
-			variables: { userId: 1 },
+			variables: { userId },
 			onSubscriptionData: ({ subscriptionData: { data } }) => {
 				const event = data.chatEvent
-				if (event.chatId == chatId) {
-					setMessages((prevMessages) => [...prevMessages, event.message])
+				if (event.chatId !== chatId) return
+				switch (event.type) {
+					case 'MESSAGE_POSTED':
+						setMessages((prevMessages) => [...prevMessages, event.message])
+						break
+					case 'USER_TYPING':
+						setUserTyping(event.user?.name)
+						break
 				}
 			},
 		}
@@ -89,6 +105,7 @@ export default function MessageList({ chatId }) {
 					<div>{message.content}</div>
 				</div>
 			))}
+			{userTyping && <div>{userTyping} is typing...</div>}
 		</>
 	)
 }

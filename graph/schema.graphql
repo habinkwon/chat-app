@@ -11,12 +11,13 @@ type Query {
 }
 
 type Mutation {
-	setAsOnline: User
 	createChat(userIds: [ID!]!): Chat!
 	deleteChat(id: ID!): Chat!
 	postMessage(chatId: ID!, text: String!, replyTo: ID): Message!
 	editMessage(id: ID!, text: String!): Message!
 	deleteMessage(id: ID!): Message!
+	setAsOnline: User
+	userTyping(chatId: ID!): User
 }
 
 type Subscription {
@@ -49,7 +50,6 @@ type Chat {
 
 type Message {
 	id: ID!
-	type: MessageType!
 	content: String!
 	event: String!
 	sender: User
@@ -58,19 +58,16 @@ type Message {
 	editedAt: Time
 }
 
-enum MessageType {
-	MESSAGE
-	EVENT
-}
-
 type ChatEvent {
 	type: ChatEventType!
 	chatId: ID!
 	message: Message
+	user: User @goField(forceResolver: true)
 }
 
 enum ChatEventType {
 	MESSAGE_POSTED
 	MESSAGE_EDITED
 	MESSAGE_DELETED
+	USER_TYPING
 }

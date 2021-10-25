@@ -13,6 +13,7 @@ type ChatEvent struct {
 	Type    ChatEventType `json:"type"`
 	ChatID  int64         `json:"chatId"`
 	Message *Message      `json:"message"`
+	User    *User         `json:"user"`
 }
 
 type User struct {
@@ -30,17 +31,19 @@ const (
 	ChatEventTypeMessagePosted  ChatEventType = "MESSAGE_POSTED"
 	ChatEventTypeMessageEdited  ChatEventType = "MESSAGE_EDITED"
 	ChatEventTypeMessageDeleted ChatEventType = "MESSAGE_DELETED"
+	ChatEventTypeUserTyping     ChatEventType = "USER_TYPING"
 )
 
 var AllChatEventType = []ChatEventType{
 	ChatEventTypeMessagePosted,
 	ChatEventTypeMessageEdited,
 	ChatEventTypeMessageDeleted,
+	ChatEventTypeUserTyping,
 }
 
 func (e ChatEventType) IsValid() bool {
 	switch e {
-	case ChatEventTypeMessagePosted, ChatEventTypeMessageEdited, ChatEventTypeMessageDeleted:
+	case ChatEventTypeMessagePosted, ChatEventTypeMessageEdited, ChatEventTypeMessageDeleted, ChatEventTypeUserTyping:
 		return true
 	}
 	return false
@@ -64,47 +67,6 @@ func (e *ChatEventType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ChatEventType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type MessageType string
-
-const (
-	MessageTypeMessage MessageType = "MESSAGE"
-	MessageTypeEvent   MessageType = "EVENT"
-)
-
-var AllMessageType = []MessageType{
-	MessageTypeMessage,
-	MessageTypeEvent,
-}
-
-func (e MessageType) IsValid() bool {
-	switch e {
-	case MessageTypeMessage, MessageTypeEvent:
-		return true
-	}
-	return false
-}
-
-func (e MessageType) String() string {
-	return string(e)
-}
-
-func (e *MessageType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = MessageType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid MessageType", str)
-	}
-	return nil
-}
-
-func (e MessageType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

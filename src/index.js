@@ -8,6 +8,9 @@ import { getMainDefinition } from '@apollo/client/utilities'
 import App from './App'
 import './styles.css'
 
+const params = new URLSearchParams(window.location.search)
+const userId = params.get('userId') ?? 1
+
 const httpLink = createHttpLink({
 	uri: process.env.HTTP_URL,
 })
@@ -17,10 +20,8 @@ const wsLink = new WebSocketLink({
 		reconnect: true,
 		connectionParams: () => {
 			return {
-				Authorization: 'Bearer 1',
 				headers: {
-					Authorization: 'Bearer 2',
-					'user-id': 1,
+					'user-id': userId,
 				},
 			}
 		},
@@ -40,7 +41,7 @@ const authLink = setContext((_, { headers }) => {
 		headers: {
 			...headers,
 			authorization: token ? `Bearer ${token}` : '',
-			'user-id': 1,
+			'user-id': userId,
 		},
 	}
 })
@@ -51,7 +52,7 @@ const client = new ApolloClient({
 
 render(
 	<ApolloProvider client={client}>
-		<App />
+		<App userId={userId} />
 	</ApolloProvider>,
 	document.getElementById('root')
 )

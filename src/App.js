@@ -4,7 +4,7 @@ import ChatList from './ChatList'
 import MessageList from './MessageList'
 import MessageComposer from './MessageComposer'
 
-export default function App() {
+export default function App({ userId }) {
 	const [chatId, setChatId] = useState(0)
 
 	const [setAsOnline] = useMutation(gql`
@@ -29,7 +29,7 @@ export default function App() {
 				<div className="col">
 					{chatId ? (
 						<>
-							<MessageList chatId={chatId} />
+							<MessageList chatId={chatId} userId={userId} />
 							<MessageComposer chatId={chatId} />
 						</>
 					) : (

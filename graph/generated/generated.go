@@ -39,6 +39,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Chat() ChatResolver
+	ChatEvent() ChatEventResolver
 	Message() MessageResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
@@ -64,6 +65,7 @@ type ComplexityRoot struct {
 		ChatID  func(childComplexity int) int
 		Message func(childComplexity int) int
 		Type    func(childComplexity int) int
+		User    func(childComplexity int) int
 	}
 
 	Message struct {
@@ -74,7 +76,6 @@ type ComplexityRoot struct {
 		ID        func(childComplexity int) int
 		ReplyTo   func(childComplexity int) int
 		Sender    func(childComplexity int) int
-		Type      func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -84,6 +85,7 @@ type ComplexityRoot struct {
 		EditMessage   func(childComplexity int, id int64, text string) int
 		PostMessage   func(childComplexity int, chatID int64, text string, replyTo *int64) int
 		SetAsOnline   func(childComplexity int) int
+		UserTyping    func(childComplexity int, chatID int64) int
 	}
 
 	Query struct {
@@ -112,17 +114,21 @@ type ChatResolver interface {
 	Messages(ctx context.Context, obj *model.Chat, first *int, after *int64, desc *bool) ([]*model.Message, error)
 	CreatedBy(ctx context.Context, obj *model.Chat) (*model.User, error)
 }
+type ChatEventResolver interface {
+	User(ctx context.Context, obj *model.ChatEvent) (*model.User, error)
+}
 type MessageResolver interface {
 	Sender(ctx context.Context, obj *model.Message) (*model.User, error)
 	ReplyTo(ctx context.Context, obj *model.Message) (*model.Message, error)
 }
 type MutationResolver interface {
-	SetAsOnline(ctx context.Context) (*model.User, error)
 	CreateChat(ctx context.Context, userIds []int64) (*model.Chat, error)
 	DeleteChat(ctx context.Context, id int64) (*model.Chat, error)
 	PostMessage(ctx context.Context, chatID int64, text string, replyTo *int64) (*model.Message, error)
 	EditMessage(ctx context.Context, id int64, text string) (*model.Message, error)
 	DeleteMessage(ctx context.Context, id int64) (*model.Message, error)
+	SetAsOnline(ctx context.Context) (*model.User, error)
+	UserTyping(ctx context.Context, chatID int64) (*model.User, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*model.User, error)
@@ -227,6 +233,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ChatEvent.Type(childComplexity), true
 
+	case "ChatEvent.user":
+		if e.complexity.ChatEvent.User == nil {
+			break
+		}
+
+		return e.complexity.ChatEvent.User(childComplexity), true
+
 	case "Message.content":
 		if e.complexity.Message.Content == nil {
 			break
@@ -275,13 +288,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Message.Sender(childComplexity), true
-
-	case "Message.type":
-		if e.complexity.Message.Type == nil {
-			break
-		}
-
-		return e.complexity.Message.Type(childComplexity), true
 
 	case "Mutation.createChat":
 		if e.complexity.Mutation.CreateChat == nil {
@@ -349,6 +355,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SetAsOnline(childComplexity), true
+
+	case "Mutation.userTyping":
+		if e.complexity.Mutation.UserTyping == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_userTyping_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UserTyping(childComplexity, args["chatId"].(int64)), true
 
 	case "Query.chat":
 		if e.complexity.Query.Chat == nil {
@@ -541,12 +559,13 @@ type Query {
 }
 
 type Mutation {
-	setAsOnline: User
 	createChat(userIds: [ID!]!): Chat!
 	deleteChat(id: ID!): Chat!
 	postMessage(chatId: ID!, text: String!, replyTo: ID): Message!
 	editMessage(id: ID!, text: String!): Message!
 	deleteMessage(id: ID!): Message!
+	setAsOnline: User
+	userTyping(chatId: ID!): User
 }
 
 type Subscription {
@@ -579,7 +598,6 @@ type Chat {
 
 type Message {
 	id: ID!
-	type: MessageType!
 	content: String!
 	event: String!
 	sender: User
@@ -588,21 +606,18 @@ type Message {
 	editedAt: Time
 }
 
-enum MessageType {
-	MESSAGE
-	EVENT
-}
-
 type ChatEvent {
 	type: ChatEventType!
 	chatId: ID!
 	message: Message
+	user: User @goField(forceResolver: true)
 }
 
 enum ChatEventType {
 	MESSAGE_POSTED
 	MESSAGE_EDITED
 	MESSAGE_DELETED
+	USER_TYPING
 }
 `, BuiltIn: false},
 }
@@ -744,6 +759,21 @@ func (ec *executionContext) field_Mutation_postMessage_args(ctx context.Context,
 		}
 	}
 	args["replyTo"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_userTyping_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int64
+	if tmp, ok := rawArgs["chatId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("chatId"))
+		arg0, err = ec.unmarshalNID2int64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["chatId"] = arg0
 	return args, nil
 }
 
@@ -1220,6 +1250,38 @@ func (ec *executionContext) _ChatEvent_message(ctx context.Context, field graphq
 	return ec.marshalOMessage2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _ChatEvent_user(ctx context.Context, field graphql.CollectedField, obj *model.ChatEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ChatEvent",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ChatEvent().User(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Message_id(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1253,41 +1315,6 @@ func (ec *executionContext) _Message_id(ctx context.Context, field graphql.Colle
 	res := resTmp.(int64)
 	fc.Result = res
 	return ec.marshalNID2int64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Message_type(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Message",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Type, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.MessageType)
-	fc.Result = res
-	return ec.marshalNMessageType2githubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessageType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Message_content(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
@@ -1489,38 +1516,6 @@ func (ec *executionContext) _Message_editedAt(ctx context.Context, field graphql
 	res := resTmp.(*time.Time)
 	fc.Result = res
 	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_setAsOnline(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SetAsOnline(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.User)
-	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createChat(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1731,6 +1726,77 @@ func (ec *executionContext) _Mutation_deleteMessage(ctx context.Context, field g
 	res := resTmp.(*model.Message)
 	fc.Result = res
 	return ec.marshalNMessage2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_setAsOnline(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SetAsOnline(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_userTyping(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_userTyping_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UserTyping(rctx, args["chatId"].(int64))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3487,7 +3553,7 @@ func (ec *executionContext) _ChatEvent(ctx context.Context, sel ast.SelectionSet
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "chatId":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -3497,7 +3563,7 @@ func (ec *executionContext) _ChatEvent(ctx context.Context, sel ast.SelectionSet
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "message":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -3506,6 +3572,23 @@ func (ec *executionContext) _ChatEvent(ctx context.Context, sel ast.SelectionSet
 
 			out.Values[i] = innerFunc(ctx)
 
+		case "user":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ChatEvent_user(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3530,16 +3613,6 @@ func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, 
 		case "id":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Message_id(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "type":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Message_type(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -3648,13 +3721,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "setAsOnline":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_setAsOnline(ctx, field)
-			}
-
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
-
 		case "createChat":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createChat(ctx, field)
@@ -3705,6 +3771,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "setAsOnline":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_setAsOnline(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
+		case "userTyping":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_userTyping(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4570,16 +4650,6 @@ func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋhabinkwonᚋchat�
 		return graphql.Null
 	}
 	return ec._Message(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNMessageType2githubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessageType(ctx context.Context, v interface{}) (model.MessageType, error) {
-	var res model.MessageType
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNMessageType2githubᚗcomᚋhabinkwonᚋchatᚑappᚋgraphᚋmodelᚐMessageType(ctx context.Context, sel ast.SelectionSet, v model.MessageType) graphql.Marshaler {
-	return v
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
