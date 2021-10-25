@@ -9,10 +9,10 @@ import App from './App'
 import './styles.css'
 
 const httpLink = createHttpLink({
-	uri: 'http://localhost:8080/query',
+	uri: process.env.HTTP_URL,
 })
 const wsLink = new WebSocketLink({
-	uri: 'ws://localhost:8080/query',
+	uri: process.env.WS_URL,
 	options: {
 		reconnect: true,
 		connectionParams: () => {
