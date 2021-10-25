@@ -39,6 +39,10 @@ func (r *messageResolver) ReplyTo(ctx context.Context, obj *model.Message) (*mod
 	return r.ChatSvc.GetMessage(ctx, *obj.ReplyToID)
 }
 
+func (r *mutationResolver) SetAsOnline(ctx context.Context) (*model.User, error) {
+	return r.UserSvc.SetAsOnline(ctx)
+}
+
 func (r *mutationResolver) CreateChat(ctx context.Context, userIds []int64) (*model.Chat, error) {
 	id, err := r.ChatSvc.CreateChat(ctx, userIds)
 	if err != nil {
@@ -112,6 +116,10 @@ func (r *subscriptionResolver) ChatEvent(ctx context.Context, userID int64) (<-c
 	return r.ChatSvc.ReceiveEvents(ctx, userID)
 }
 
+func (r *userResolver) Status(ctx context.Context, obj *model.User) (model.UserStatus, error) {
+	return r.UserSvc.GetStatus(ctx, obj.ID)
+}
+
 // Chat returns generated.ChatResolver implementation.
 func (r *Resolver) Chat() generated.ChatResolver { return &chatResolver{r} }
 
@@ -127,8 +135,12 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 // Subscription returns generated.SubscriptionResolver implementation.
 func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
 
+// User returns generated.UserResolver implementation.
+func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
+
 type chatResolver struct{ *Resolver }
 type messageResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
+type userResolver struct{ *Resolver }

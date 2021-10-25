@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { gql, useMutation } from '@apollo/client'
 
 export default function MessageComposer({ chatId }) {

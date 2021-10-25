@@ -1,3 +1,8 @@
+directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+scalar Time
+
 type Query {
 	me: User!
 	user(id: ID!): User
@@ -6,6 +11,7 @@ type Query {
 }
 
 type Mutation {
+	setAsOnline: User
 	createChat(userIds: [ID!]!): Chat!
 	deleteChat(id: ID!): Chat!
 	postMessage(chatId: ID!, text: String!, replyTo: ID): Message!
@@ -17,14 +23,18 @@ type Subscription {
 	chatEvent(userId: ID!): ChatEvent!
 }
 
-scalar Time
-
 type User {
 	id: ID!
 	name: String!
 	username: String!
 	email: String!
+	status: UserStatus! @goField(forceResolver: true)
 	createdAt: Time!
+}
+
+enum UserStatus {
+	OFFLINE
+	ONLINE
 }
 
 type Chat {
