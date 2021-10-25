@@ -63,7 +63,10 @@ export default function MessageList({ chatId }) {
 		{
 			variables: { userId: 1 },
 			onSubscriptionData: ({ subscriptionData: { data } }) => {
-				console.log(data)
+				const event = data.chatEvent
+				if (event.chatId == chatId) {
+					setMessages((prevMessages) => [...prevMessages, event.message])
+				}
 			},
 		}
 	)

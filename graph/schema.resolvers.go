@@ -30,10 +30,11 @@ func (r *chatResolver) CreatedBy(ctx context.Context, obj *model.Chat) (*model.U
 
 func (r *chatEventResolver) Message(ctx context.Context, obj *model.ChatEvent) (*model.Message, error) {
 	m := &model.Message{
-		ID:       obj.MessageID,
-		Content:  obj.Content,
-		SenderID: obj.SenderID,
-		EditedAt: &obj.CreatedAt,
+		ID:        obj.MessageID,
+		Type:      model.MessageTypeMessage,
+		Content:   obj.Content,
+		SenderID:  obj.SenderID,
+		CreatedAt: obj.CreatedAt,
 	}
 	return m, nil
 }
