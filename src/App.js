@@ -1,9 +1,3 @@
-import React, { useState, useEffect } from 'react'
-import { gql, useMutation } from '@apollo/client'
-import ChatList from './ChatList'
-import MessageList from './MessageList'
-import MessageComposer from './MessageComposer'
-
 export default function App({ userId }) {
 	const [chatId, setChatId] = useState(0)
 

@@ -9,7 +9,6 @@ specifiers:
   babel-loader: ^8.2.3
   copy-webpack-plugin: ^9.0.1
   css-loader: ^6.4.0
-  dotenv: ^10.0.0
   graphql: ^15.6.1
   html-webpack-plugin: ^5.4.0
   lodash: ^4.17.21
@@ -34,7 +33,6 @@ devDependencies:
   babel-loader: 8.2.3_c444cf13e6678c57cc8afd2aacdd011d
   copy-webpack-plugin: 9.0.1_webpack@5.59.1
   css-loader: 6.4.0_webpack@5.59.1
-  dotenv: 10.0.0
   html-webpack-plugin: 5.4.0_webpack@5.59.1
   mini-css-extract-plugin: 2.4.3_webpack@5.59.1
   style-loader: 3.3.1_webpack@5.59.1
@@ -2058,11 +2056,6 @@ packages:
     dependencies:
       no-case: 3.0.4
       tslib: 2.3.1
-    dev: true
-
-  /dotenv/10.0.0:
-    resolution: {integrity: sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==}
-    engines: {node: '>=10'}
     dev: true
 
   /ee-first/1.1.1:
