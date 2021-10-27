@@ -9,10 +9,16 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 dotenv.config()
 
 module.exports = {
-	entry: path.resolve(__dirname, 'src/index.js'),
+	entry: {
+		chat: path.resolve(__dirname, 'src/index.js'),
+	},
 	output: {
 		path: path.resolve(__dirname, 'dist'),
-		filename: 'bundle.js',
+		filename: '[name].js',
+		library: {
+			name: '[name]',
+			type: 'umd',
+		},
 	},
 	module: {
 		rules: [
@@ -23,7 +29,7 @@ module.exports = {
 				use: {
 					loader: 'babel-loader',
 					options: {
-						presets: ['@babel/preset-env', '@babel/preset-react'],
+						presets: ['@babel/preset-env'],
 						plugins: ['@babel/transform-runtime'],
 					},
 				},
@@ -40,12 +46,13 @@ module.exports = {
 	},
 	plugins: [
 		new MiniCssExtractPlugin({
-			filename: 'css/[name].css',
-			chunkFilename: 'styles.css',
+			filename: '[name].css',
 		}),
 		new HtmlWebpackPlugin({
 			template: path.resolve(__dirname, 'src/index.html'),
 			filename: 'index.html',
+			inject: 'head',
+			scriptLoading: 'blocking',
 		}),
 		new CopyWebpackPlugin({
 			patterns: [
@@ -63,7 +70,7 @@ module.exports = {
 		static: {
 			directory: path.resolve(__dirname, 'public'),
 		},
-		port: 8000,
+		port: 9000,
 		allowedHosts: ['lo.cal'],
 		https: {
 			cert: fs.readFileSync('/Users/habin/dev/pki/lo.cal/cert.pem'),
