@@ -46,6 +46,33 @@ export class ChatClient {
 			cache: new InMemoryCache(),
 		})
 	}
+
+	async getChats() {
+		const result = await this.client.query({
+			query: gql`
+				query GetChats {
+					chats {
+						id
+						name
+						messages(first: 1, desc: true) {
+							content
+							createdAt
+						}
+					}
+				}
+			`,
+		})
+		const chats = []
+		result.data.chats.forEach((chat) => {
+			chats.push({
+				id: chat.id,
+				name: chat.name,
+				lastMessage: chat.messages?.[0]?.content ?? '',
+				lastPostedAt: chat.messages?.[0]?.createdAt ?? '',
+			})
+		})
+		return chats
+	}
 }
 
 export class ChatView {}

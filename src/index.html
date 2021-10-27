@@ -8,7 +8,16 @@
 	</head>
 
 	<body>
-		<div id="root"></div>
+		<div className="container">
+			<div className="row">
+				<div className="col-2">
+					<div id="chatList"></div>
+				</div>
+				<div className="col">
+					<div id="chatView"></div>
+				</div>
+			</div>
+		</div>
 		<script>
 			const client = new chat.ChatClient({
 				httpUrl: 'https://chat.habin.io/query',
@@ -17,7 +26,27 @@
 				// wsUrl: 'ws://localhost:8080/query',
 				token: '1',
 			})
-			console.log(client)
+
+			;(async () => {
+				// const chats = await client.getChats()
+				// console.log(chats)
+			})()
+
+			async function loadChatList() {
+				const $list = document.querySelector('#chatList')
+				$list.innerHTML = 'Loading...'
+				const chats = await client.getChats()
+				$list.innerHTML = ''
+				chats.forEach((chat) => {
+					$list.innerHTML += `
+					<div>
+						<strong>${chat.name}</strong><br>
+						${chat.lastMessage} ${chat.lastPostedAt}
+					</div>`
+				})
+			}
+
+			loadChatList()
 		</script>
 	</body>
 </html>
