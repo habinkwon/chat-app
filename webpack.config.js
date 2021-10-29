@@ -47,8 +47,9 @@ module.exports = {
 		new HtmlWebpackPlugin({
 			template: path.resolve(__dirname, 'src/index.html'),
 			filename: 'index.html',
-			inject: 'head',
-			scriptLoading: 'blocking',
+			inject: false,
+			// inject: 'head',
+			// scriptLoading: 'blocking',
 		}),
 		new CopyWebpackPlugin({
 			patterns: [
