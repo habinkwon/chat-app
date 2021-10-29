@@ -5,14 +5,6 @@ import throttle from 'lodash/throttle'
 export default function MessageComposer({ chatId }) {
 	const [message, setMessage] = useState('')
 
-	const [postMessage] = useMutation(gql`
-		mutation PostMessage($chatId: ID!, $message: String!) {
-			postMessage(chatId: $chatId, text: $message) {
-				id
-			}
-		}
-	`)
-
 	const [userTyping] = useMutation(gql`
 		mutation UserTyping($chatId: ID!) {
 			userTyping(chatId: $chatId) {

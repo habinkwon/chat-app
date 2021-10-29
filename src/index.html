@@ -18,6 +18,7 @@
 				</div>
 			</div>
 		</div>
+		<button id="post">Post</button>
 		<script>
 			const client = new chat.ChatClient({
 				httpUrl: 'https://chat.habin.io/query',
@@ -27,9 +28,20 @@
 				token: '1',
 			})
 
+			let chatId
 			;(async () => {
-				// const chats = await client.getChats()
-				// console.log(chats)
+				try {
+					// const chats = await client.getChats()
+					// console.log(chats)
+					chatId = await client.createChat(3)
+					// console.log(await client.deleteChat(chatId))
+					client.streamMessages({
+						onMessagePosted: (message) => console.log(message),
+						onUserTyping: (userName) => console.log(userName),
+					})
+				} catch (e) {
+					console.log(e)
+				}
 			})()
 
 			async function loadChatList() {
@@ -47,6 +59,13 @@
 			}
 
 			loadChatList()
+
+			document.querySelector('#post').onclick = () => {
+				client.postMessage({
+					chatId,
+					message: Date.now().toString(),
+				})
+			}
 		</script>
 	</body>
 </html>
