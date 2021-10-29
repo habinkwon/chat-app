@@ -128,7 +128,7 @@ export class ChatClient {
 		const result = await this.client.query({
 			query: gql`
 				query GetMessages($chatId: ID!, $limit: Int, $after: ID) {
-					chat(id: $id) {
+					chat(id: $chatId) {
 						messages(first: $limit, after: $after, desc: true) {
 							id
 							content

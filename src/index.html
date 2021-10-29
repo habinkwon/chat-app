@@ -31,10 +31,14 @@
 			let chatId
 			;(async () => {
 				try {
-					// const chats = await client.getChats()
-					// console.log(chats)
 					chatId = await client.createChat(3)
 					// console.log(await client.deleteChat(chatId))
+
+					let messages = await client.listMessages({ chatId, limit: 5 })
+					console.log(messages)
+					messages = await client.listMessages({ chatId, limit: 5, after: messages[0].id })
+					console.log(messages)
+
 					client.streamMessages({
 						onMessagePosted: (message) => console.log(message),
 						onUserTyping: (userName) => console.log(userName),
@@ -47,8 +51,10 @@
 			async function loadChatList() {
 				const $list = document.querySelector('#chatList')
 				$list.innerHTML = 'Loading...'
+
 				const chats = await client.getChats()
 				$list.innerHTML = ''
+
 				chats.forEach((chat) => {
 					$list.innerHTML += `
 					<div>
@@ -57,7 +63,6 @@
 					</div>`
 				})
 			}
-
 			loadChatList()
 
 			document.querySelector('#post').onclick = () => {
