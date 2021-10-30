@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/base64"
 	"flag"
 	"fmt"
 	"log"
@@ -35,6 +36,7 @@ func main() {
 	listenAddr := flag.String("listen", ":8080", "")
 	mysqlAddr := flag.String("mysql", "root@tcp(maria)/chat?parseTime=true", "")
 	redisAddr := flag.String("redis", "redis:6379", "")
+	secretStr := flag.String("secret", "", "")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -63,6 +65,11 @@ func main() {
 	idNode, err := snowflake.NewNode(0)
 	if err != nil {
 		log.Fatal(fmt.Errorf("error initializing snowflake: %w", err))
+	}
+
+	secret, err := base64.StdEncoding.DecodeString(*secretStr)
+	if err != nil {
+		log.Fatal(fmt.Errorf("invalid secret: %w", err))
 	}
 
 	resolver := &graph.Resolver{
@@ -102,7 +109,7 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(c.Handler)
-	r.Use(auth.Middleware())
+	r.Use(auth.Middleware(secret))
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	r.Handle("/query", s)
 
