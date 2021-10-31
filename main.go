@@ -36,14 +36,15 @@ func main() {
 	listenAddr := flag.String("listen", ":8080", "")
 	mysqlAddr := flag.String("mysql", "root@tcp(maria)/chat?parseTime=true", "")
 	redisAddr := flag.String("redis", "redis:6379", "")
-	secretKey := flag.String("secret", "", "")
+	envFile := flag.String("envFile", ".env", "")
 	flag.Parse()
 
-	if err := godotenv.Load(); err != nil && !os.IsNotExist(err) {
+	if err := godotenv.Load(*envFile); err != nil && !os.IsNotExist(err) {
 		log.Fatal(fmt.Errorf("error loading .env file: %w", err))
 	}
-	if key := os.Getenv("SECRET_KEY"); key != "" {
-		*secretKey = key
+	secretKey := os.Getenv("SECRET_KEY")
+	if secretKey != "" {
+		log.Println("loaded secret key")
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -75,7 +76,7 @@ func main() {
 	}
 
 	authMw := &auth.Middleware{
-		Secret: []byte(*secretKey),
+		Secret: []byte(secretKey),
 	}
 	resolver := &graph.Resolver{
 		UserSvc: &service.User{

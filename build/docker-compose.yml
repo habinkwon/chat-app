@@ -1,10 +1,12 @@
-version: "3"
+version: '3'
 services:
   chat-server:
     image: chat-server
     container_name: chat-server
     hostname: chat-server
     restart: on-failure:3
+    env_file:
+      - ../.env
 networks:
   default:
     external:
