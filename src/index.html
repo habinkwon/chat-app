@@ -38,9 +38,9 @@
           // console.log(await client.deleteChat(chatId))
 
           let messages = await client.listMessages({ chatId, limit: 5 })
-          console.log(messages)
+          console.log('messages', messages)
           messages = await client.listMessages({ chatId, limit: 5, after: messages[0].id })
-          console.log(messages)
+          console.log('next messages', messages)
 
           client.streamMessages({
             onMessagePosted: (message) => console.log(message),
@@ -65,6 +65,7 @@
 						${chat.lastMessage} ${chat.lastPostedAt}
 					</div>`
         })
+        console.log('chats', chats)
       }
       loadChatList()
 

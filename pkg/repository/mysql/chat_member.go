@@ -51,7 +51,7 @@ func (r *ChatMember) Exists(ctx context.Context, chatId, userId int64) (ok bool,
 	return cnt != 0, nil
 }
 
-func (r *ChatMember) Get(ctx context.Context, chatId int64) (memberIds []int64, err error) {
+func (r *ChatMember) GetIds(ctx context.Context, chatId int64) (memberIds []int64, err error) {
 	rows, err := r.DB.QueryContext(ctx, `
 	SELECT user_id
 	FROM chat_members
@@ -67,6 +67,31 @@ func (r *ChatMember) Get(ctx context.Context, chatId int64) (memberIds []int64, 
 			return
 		}
 		memberIds = append(memberIds, userId)
+	}
+	if err = rows.Err(); err != nil {
+		return
+	}
+	return
+}
+
+func (r *ChatMember) GetNames(ctx context.Context, chatId int64) (memberNames []string, err error) {
+	rows, err := r.DB.QueryContext(ctx, `
+	SELECT COALESCE(NULLIF(U.nickname, ''), U.name)
+	FROM chat_members M
+	INNER JOIN user U
+	ON U.id = M.user_id
+	WHERE M.chat_id = ?
+	`, chatId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var name string
+		if err = rows.Scan(&name); err != nil {
+			return
+		}
+		memberNames = append(memberNames, name)
 	}
 	if err = rows.Err(); err != nil {
 		return

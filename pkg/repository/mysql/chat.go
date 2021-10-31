@@ -65,18 +65,17 @@ func (r *Chat) Exists(ctx context.Context, userIds []int64) (chatId int64, err e
 
 func (r *Chat) Get(ctx context.Context, id, userId int64) (chat *model.Chat, err error) {
 	var (
-		name         sql.NullString
 		createdBy    int64
 		createdAt    time.Time
 		lastPostedAt time.Time
 	)
 	err = r.DB.QueryRowContext(ctx, `
-	SELECT C.name, C.created_by, C.created_at, C.last_posted_at
+	SELECT C.created_by, C.created_at, C.last_posted_at
 	FROM chats C
 	INNER JOIN chat_members M
 	ON M.chat_id = C.id
 	WHERE C.id = ? AND M.user_id = ?
-	`, id, userId).Scan(&name, &createdBy, &createdAt, &lastPostedAt)
+	`, id, userId).Scan(&createdBy, &createdAt, &lastPostedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
@@ -84,7 +83,6 @@ func (r *Chat) Get(ctx context.Context, id, userId int64) (chat *model.Chat, err
 	}
 	chat = &model.Chat{
 		ID:           id,
-		Name:         name.String,
 		CreatorID:    createdBy,
 		CreatedAt:    createdAt,
 		LastPostedAt: lastPostedAt,
@@ -94,7 +92,7 @@ func (r *Chat) Get(ctx context.Context, id, userId int64) (chat *model.Chat, err
 
 func (r *Chat) List(ctx context.Context, userId int64, first int, after int64) (chats []*model.Chat, err error) {
 	rows, err := r.DB.QueryContext(ctx, `
-	SELECT C.id, C.name, C.created_by, C.created_at, C.last_posted_at
+	SELECT C.id, C.created_by, C.created_at, C.last_posted_at
 	FROM chats C
 	INNER JOIN chat_members M
 	ON M.chat_id = C.id
@@ -109,17 +107,15 @@ func (r *Chat) List(ctx context.Context, userId int64, first int, after int64) (
 	for rows.Next() {
 		var (
 			id           int64
-			name         sql.NullString
 			createdBy    int64
 			createdAt    time.Time
 			lastPostedAt time.Time
 		)
-		if err = rows.Scan(&id, &name, &createdBy, &createdAt, &lastPostedAt); err != nil {
+		if err = rows.Scan(&id, &createdBy, &createdAt, &lastPostedAt); err != nil {
 			return
 		}
 		chats = append(chats, &model.Chat{
 			ID:           id,
-			Name:         name.String,
 			CreatorID:    createdBy,
 			CreatedAt:    createdAt,
 			LastPostedAt: lastPostedAt,

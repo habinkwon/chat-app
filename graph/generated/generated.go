@@ -117,6 +117,7 @@ type ComplexityRoot struct {
 }
 
 type ChatResolver interface {
+	Name(ctx context.Context, obj *model.Chat) (string, error)
 	Members(ctx context.Context, obj *model.Chat) ([]*model.User, error)
 	Messages(ctx context.Context, obj *model.Chat, first *int, after *int64, desc *bool) ([]*model.Message, error)
 	CreatedBy(ctx context.Context, obj *model.Chat) (*model.User, error)
@@ -657,7 +658,7 @@ enum UserStatus {
 
 type Chat {
   id: ID!
-  name: String!
+  name: String! @goField(forceResolver: true)
   members: [User!]!
   messages(first: Int, after: ID, desc: Boolean): [Message!]!
   createdBy: User
@@ -1023,14 +1024,14 @@ func (ec *executionContext) _Chat_name(ctx context.Context, field graphql.Collec
 		Object:     "Chat",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		return ec.resolvers.Chat().Name(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3740,15 +3741,25 @@ func (ec *executionContext) _Chat(ctx context.Context, sel ast.SelectionSet, obj
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
+			field := field
+
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Chat_name(ctx, field, obj)
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Chat_name(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
 
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			})
 		case "members":
 			field := field
 

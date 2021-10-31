@@ -85,6 +85,11 @@ export class ChatClient {
           chats {
             id
             name
+            members {
+              id
+              name
+              nickname
+            }
             messages(first: 1, desc: true) {
               content
               createdAt
@@ -95,9 +100,15 @@ export class ChatClient {
     })
     const chats = []
     result.data.chats.forEach((chat) => {
+      const members = chat.members?.map((member) => ({
+        id: member.id,
+        name: member.name,
+        nickname: member.nickname,
+      }))
       chats.push({
         id: chat.id,
         name: chat.name,
+        members,
         lastMessage: chat.messages?.[0]?.content ?? '',
         lastPostedAt: chat.messages?.[0]?.createdAt ?? '',
       })
@@ -133,6 +144,7 @@ export class ChatClient {
               sender {
                 id
                 name
+                nickname
               }
               createdAt
             }
@@ -150,7 +162,9 @@ export class ChatClient {
       id: message.id,
       message: message.content,
       senderId: message.sender?.id,
-      sender: message.sender?.name,
+      sender: message.sender?.nickname || message.sender?.name,
+      senderName: message.sender?.name,
+      senderNickname: message.sender?.nickname,
       createdAt: message.createdAt,
     }))
     return messages
@@ -170,6 +184,7 @@ export class ChatClient {
                 sender {
                   id
                   name
+                  nickname
                 }
                 createdAt
               }
@@ -192,7 +207,9 @@ export class ChatClient {
                   id: message.id,
                   message: message.content,
                   senderId: message.sender?.id,
-                  sender: message.sender?.name,
+                  sender: message.sender?.nickname || message.sender?.name,
+                  senderName: message.sender?.name,
+                  senderNickname: message.sender?.nickname,
                   createdAt: message.createdAt,
                 })
               break

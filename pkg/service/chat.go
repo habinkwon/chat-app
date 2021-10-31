@@ -90,14 +90,7 @@ func (s *Chat) GetChat(ctx context.Context, id int64) (*model.Chat, error) {
 	if userId == 0 {
 		return nil, auth.ErrNoAuth
 	}
-	chat, err := s.ChatRepo.Get(ctx, id, userId)
-	if err != nil || chat == nil {
-		return nil, err
-	}
-	if chat.Name == "" {
-		chat.Name = util.FormatID(chat.ID)
-	}
-	return chat, nil
+	return s.ChatRepo.Get(ctx, id, userId)
 }
 
 func (s *Chat) ListChats(ctx context.Context, first int, after int64) ([]*model.Chat, error) {
@@ -105,16 +98,7 @@ func (s *Chat) ListChats(ctx context.Context, first int, after int64) ([]*model.
 	if userId == 0 {
 		return nil, auth.ErrNoAuth
 	}
-	chats, err := s.ChatRepo.List(ctx, userId, first, after)
-	if err != nil {
-		return nil, err
-	}
-	for _, chat := range chats {
-		if chat.Name == "" {
-			chat.Name = util.FormatID(chat.ID)
-		}
-	}
-	return chats, nil
+	return s.ChatRepo.List(ctx, userId, first, after)
 }
 
 func (s *Chat) GetMemberIds(ctx context.Context, chatId int64) (memberIds []int64, err error) {
@@ -123,7 +107,7 @@ func (s *Chat) GetMemberIds(ctx context.Context, chatId int64) (memberIds []int6
 		return nil, auth.ErrNoAuth
 	}
 
-	memberIds, err = s.ChatMemberRepo.Get(ctx, chatId)
+	memberIds, err = s.ChatMemberRepo.GetIds(ctx, chatId)
 	if err != nil {
 		return nil, err
 	} else if !util.ContainsInt64(memberIds, userId) {
@@ -132,13 +116,26 @@ func (s *Chat) GetMemberIds(ctx context.Context, chatId int64) (memberIds []int6
 	return
 }
 
+func (s *Chat) GetMemberNames(ctx context.Context, chatId int64) (memberNames []string, err error) {
+	userId := auth.UserId(ctx)
+	if userId == 0 {
+		return nil, auth.ErrNoAuth
+	}
+	if ok, err := s.ChatMemberRepo.Exists(ctx, chatId, userId); err != nil {
+		return nil, err
+	} else if !ok {
+		return nil, auth.ErrPerm
+	}
+	return s.ChatMemberRepo.GetNames(ctx, chatId)
+}
+
 func (s *Chat) PostMessage(ctx context.Context, chatId int64, content string, replyTo *int64) (id int64, err error) {
 	userId := auth.UserId(ctx)
 	if userId == 0 {
 		return 0, auth.ErrNoAuth
 	}
 
-	memberIds, err := s.ChatMemberRepo.Get(ctx, chatId)
+	memberIds, err := s.ChatMemberRepo.GetIds(ctx, chatId)
 	if err != nil {
 		return 0, err
 	} else if !util.ContainsInt64(memberIds, userId) {
@@ -194,7 +191,7 @@ func (s *Chat) DeleteMessage(ctx context.Context, id int64) error {
 		return auth.ErrPerm
 	}
 
-	memberIds, err := s.ChatMemberRepo.Get(ctx, chatId)
+	memberIds, err := s.ChatMemberRepo.GetIds(ctx, chatId)
 	if err != nil {
 		return err
 	} else if !util.ContainsInt64(memberIds, userId) {
@@ -234,7 +231,7 @@ func (s *Chat) EditMessage(ctx context.Context, id int64, content string) error 
 		return auth.ErrPerm
 	}
 
-	memberIds, err := s.ChatMemberRepo.Get(ctx, chatId)
+	memberIds, err := s.ChatMemberRepo.GetIds(ctx, chatId)
 	if err != nil {
 		return err
 	} else if !util.ContainsInt64(memberIds, userId) {
@@ -305,7 +302,7 @@ func (s *Chat) UserTyping(ctx context.Context, chatId int64) (*model.User, error
 		return nil, auth.ErrNoAuth
 	}
 
-	memberIds, err := s.ChatMemberRepo.Get(ctx, chatId)
+	memberIds, err := s.ChatMemberRepo.GetIds(ctx, chatId)
 	if err != nil {
 		return nil, err
 	} else if !util.ContainsInt64(memberIds, userId) {

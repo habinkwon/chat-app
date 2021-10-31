@@ -60,7 +60,7 @@ func (r *User) GetAll(ctx context.Context, ids []int64) (users []*model.User, er
 		args[i] = id
 	}
 	rows, err := r.DB.QueryContext(ctx, fmt.Sprintf(`
-	SELECT name, nickname, email, picture, livingPlace, preference1, preference2, preference3, selfIntroduction, role
+	SELECT id, name, nickname, email, picture, livingPlace, preference1, preference2, preference3, selfIntroduction, role
 	FROM user
 	WHERE id IN (?%s)
 	ORDER BY id
@@ -109,7 +109,7 @@ func (r *User) GetAll(ctx context.Context, ids []int64) (users []*model.User, er
 
 func (r *User) List(ctx context.Context, first int, after int64) (users []*model.User, err error) {
 	rows, err := r.DB.QueryContext(ctx, `
-	SELECT name, nickname, email, picture, livingPlace, preference1, preference2, preference3, selfIntroduction, role
+	SELECT id, name, nickname, email, picture, livingPlace, preference1, preference2, preference3, selfIntroduction, role
 	FROM user
 	WHERE id > ?
 	ORDER BY id

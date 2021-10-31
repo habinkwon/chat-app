@@ -52,7 +52,7 @@ enum UserStatus {
 
 type Chat {
   id: ID!
-  name: String!
+  name: String! @goField(forceResolver: true)
   members: [User!]!
   messages(first: Int, after: ID, desc: Boolean): [Message!]!
   createdBy: User

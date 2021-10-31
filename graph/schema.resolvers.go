@@ -5,11 +5,20 @@ package graph
 
 import (
 	"context"
+	"strings"
 
 	"github.com/habinkwon/chat-app/graph/generated"
 	"github.com/habinkwon/chat-app/graph/model"
 	"github.com/habinkwon/chat-app/pkg/util"
 )
+
+func (r *chatResolver) Name(ctx context.Context, obj *model.Chat) (string, error) {
+	memberNames, err := r.ChatSvc.GetMemberNames(ctx, obj.ID)
+	if err != nil {
+		return "", err
+	}
+	return strings.Join(memberNames, ", "), nil
+}
 
 func (r *chatResolver) Members(ctx context.Context, obj *model.Chat) ([]*model.User, error) {
 	memberIds, err := r.ChatSvc.GetMemberIds(ctx, obj.ID)
