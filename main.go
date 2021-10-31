@@ -39,6 +39,11 @@ func main() {
 	envFile := flag.String("envFile", ".env", "")
 	flag.Parse()
 
+	log.Printf("using config:\n")
+	log.Printf("  listen: %s\n", *listenAddr)
+	log.Printf("  mysql: %s\n", *mysqlAddr)
+	log.Printf("  redis: %s\n", *redisAddr)
+
 	if err := godotenv.Load(*envFile); err != nil && !os.IsNotExist(err) {
 		log.Fatal(fmt.Errorf("error loading .env file: %w", err))
 	}

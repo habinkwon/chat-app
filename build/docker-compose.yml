@@ -5,6 +5,14 @@ services:
     container_name: chat-server
     hostname: chat-server
     restart: on-failure:3
+    command:
+      - /chat-server
+      - -listen
+      - :8080
+      - -mysql
+      - root@tcp(maria)/chat?parseTime=true
+      - -redis
+      - redis:6379
     env_file:
       - ../.env
 networks:
