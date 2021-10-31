@@ -74,6 +74,9 @@ func main() {
 		log.Fatal(fmt.Errorf("error initializing snowflake: %w", err))
 	}
 
+	authMw := &auth.Middleware{
+		Secret: []byte(*secretKey),
+	}
 	resolver := &graph.Resolver{
 		UserSvc: &service.User{
 			UserStatusRepo: &redisrepo.UserStatus{Redis: rdb},
@@ -84,6 +87,7 @@ func main() {
 			ChatMemberRepo:  &mysqlrepo.ChatMember{DB: db},
 			ChatMessageRepo: &mysqlrepo.ChatMessage{DB: db},
 			ChannelRepo:     &redisrepo.Channel{Redis: rdb},
+			Auth:            authMw,
 		},
 	}
 	s := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
@@ -111,7 +115,7 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(c.Handler)
-	r.Use(auth.Middleware([]byte(*secretKey)))
+	r.Use(authMw.Middleware)
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	r.Handle("/query", s)
 

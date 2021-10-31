@@ -96,7 +96,7 @@ type ComplexityRoot struct {
 	}
 
 	Subscription struct {
-		ChatEvent func(childComplexity int, userID int64) int
+		ChatEvent func(childComplexity int) int
 	}
 
 	User struct {
@@ -137,7 +137,7 @@ type QueryResolver interface {
 	Chats(ctx context.Context, first *int, after *int64) ([]*model.Chat, error)
 }
 type SubscriptionResolver interface {
-	ChatEvent(ctx context.Context, userID int64) (<-chan *model.ChatEvent, error)
+	ChatEvent(ctx context.Context) (<-chan *model.ChatEvent, error)
 }
 type UserResolver interface {
 	Status(ctx context.Context, obj *model.User) (model.UserStatus, error)
@@ -416,12 +416,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Subscription_chatEvent_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Subscription.ChatEvent(childComplexity, args["userId"].(int64)), true
+		return e.complexity.Subscription.ChatEvent(childComplexity), true
 
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
@@ -552,72 +547,72 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
 scalar Time
 
 type Query {
-	me: User!
-	user(id: ID!): User
-	chat(id: ID!): Chat
-	chats(first: Int, after: ID): [Chat!]!
+  me: User!
+  user(id: ID!): User
+  chat(id: ID!): Chat
+  chats(first: Int, after: ID): [Chat!]!
 }
 
 type Mutation {
-	createChat(userIds: [ID!]!): Chat!
-	deleteChat(id: ID!): Chat!
-	postMessage(chatId: ID!, text: String!, replyTo: ID): Message!
-	editMessage(id: ID!, text: String!): Message!
-	deleteMessage(id: ID!): Message!
-	setAsOnline: User
-	userTyping(chatId: ID!): User
+  createChat(userIds: [ID!]!): Chat!
+  deleteChat(id: ID!): Chat!
+  postMessage(chatId: ID!, text: String!, replyTo: ID): Message!
+  editMessage(id: ID!, text: String!): Message!
+  deleteMessage(id: ID!): Message!
+  setAsOnline: User
+  userTyping(chatId: ID!): User
 }
 
 type Subscription {
-	chatEvent(userId: ID!): ChatEvent!
+  chatEvent: ChatEvent!
 }
 
 type User {
-	id: ID!
-	name: String!
-	username: String!
-	email: String!
-	status: UserStatus! @goField(forceResolver: true)
-	createdAt: Time!
+  id: ID!
+  name: String!
+  username: String!
+  email: String!
+  status: UserStatus! @goField(forceResolver: true)
+  createdAt: Time!
 }
 
 enum UserStatus {
-	OFFLINE
-	ONLINE
+  OFFLINE
+  ONLINE
 }
 
 type Chat {
-	id: ID!
-	name: String!
-	members: [User!]!
-	messages(first: Int, after: ID, desc: Boolean): [Message!]!
-	createdBy: User
-	createdAt: Time!
-	lastPostedAt: Time!
+  id: ID!
+  name: String!
+  members: [User!]!
+  messages(first: Int, after: ID, desc: Boolean): [Message!]!
+  createdBy: User
+  createdAt: Time!
+  lastPostedAt: Time!
 }
 
 type Message {
-	id: ID!
-	content: String!
-	event: String!
-	sender: User
-	replyTo: Message
-	createdAt: Time!
-	editedAt: Time
+  id: ID!
+  content: String!
+  event: String!
+  sender: User
+  replyTo: Message
+  createdAt: Time!
+  editedAt: Time
 }
 
 type ChatEvent {
-	type: ChatEventType!
-	chatId: ID!
-	message: Message
-	user: User @goField(forceResolver: true)
+  type: ChatEventType!
+  chatId: ID!
+  message: Message
+  user: User @goField(forceResolver: true)
 }
 
 enum ChatEventType {
-	MESSAGE_POSTED
-	MESSAGE_EDITED
-	MESSAGE_DELETED
-	USER_TYPING
+  MESSAGE_POSTED
+  MESSAGE_EDITED
+  MESSAGE_DELETED
+  USER_TYPING
 }
 `, BuiltIn: false},
 }
@@ -843,21 +838,6 @@ func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Subscription_chatEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 int64
-	if tmp, ok := rawArgs["userId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-		arg0, err = ec.unmarshalNID2int64(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["userId"] = arg0
 	return args, nil
 }
 
@@ -2041,16 +2021,9 @@ func (ec *executionContext) _Subscription_chatEvent(ctx context.Context, field g
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Subscription_chatEvent_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Subscription().ChatEvent(rctx, args["userId"].(int64))
+		return ec.resolvers.Subscription().ChatEvent(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)

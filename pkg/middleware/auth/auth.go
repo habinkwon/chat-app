@@ -33,29 +33,37 @@ func AuthInfoFrom(ctx context.Context) *AuthInfo {
 	return ai
 }
 
-func Middleware(secret []byte) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
-			tok, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
-				return secret, nil
-			})
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
+type Middleware struct {
+	Secret []byte
+}
+
+func (m *Middleware) Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ai := &AuthInfo{}
+		ctx := context.WithValue(r.Context(), authInfoKey{}, ai)
+		if auth := r.Header.Get("Authorization"); auth != "" {
+			if err := m.Authenticate(ctx, auth); err != nil {
+				http.Error(w, err.Error(), http.StatusUnauthorized)
 			}
-			claims, _ := tok.Claims.(jwt.MapClaims)
-			userId, ok := claims["userID"].(float64)
-			if !ok {
-				http.Error(w, "invalid token", http.StatusUnauthorized)
-				return
-			}
-			ai := &AuthInfo{
-				UserId: int64(userId),
-			}
-			ctx := context.WithValue(r.Context(), authInfoKey{}, ai)
-			r = r.WithContext(ctx)
-			next.ServeHTTP(w, r)
-		})
+		}
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (m *Middleware) Authenticate(ctx context.Context, authorization string) error {
+	token := strings.TrimPrefix(authorization, "Bearer ")
+	tok, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		return m.Secret, nil
+	})
+	if err != nil {
+		return err
 	}
+	claims, _ := tok.Claims.(jwt.MapClaims)
+	userId, ok := claims["userID"].(float64)
+	if !ok {
+		return errors.New("invalid token")
+	}
+	ai := AuthInfoFrom(ctx)
+	ai.UserId = int64(userId)
+	return nil
 }

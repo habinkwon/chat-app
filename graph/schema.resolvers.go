@@ -8,7 +8,6 @@ import (
 
 	"github.com/habinkwon/chat-app/graph/generated"
 	"github.com/habinkwon/chat-app/graph/model"
-	"github.com/habinkwon/chat-app/pkg/middleware/auth"
 	"github.com/habinkwon/chat-app/pkg/util"
 )
 
@@ -122,9 +121,9 @@ func (r *queryResolver) Chats(ctx context.Context, first *int, after *int64) ([]
 	return r.ChatSvc.ListChats(ctx, util.IntOr(first, 10), util.Int64Or(after, 0))
 }
 
-func (r *subscriptionResolver) ChatEvent(ctx context.Context, userID int64) (<-chan *model.ChatEvent, error) {
-	auth.SetUserId(ctx, userID)
-	return r.ChatSvc.ReceiveEvents(ctx, userID)
+func (r *subscriptionResolver) ChatEvent(ctx context.Context) (<-chan *model.ChatEvent, error) {
+	// auth.SetUserId(ctx, userID)
+	return r.ChatSvc.ReceiveEvents(ctx)
 }
 
 func (r *userResolver) Status(ctx context.Context, obj *model.User) (model.UserStatus, error) {

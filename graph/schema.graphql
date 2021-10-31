@@ -4,70 +4,70 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
 scalar Time
 
 type Query {
-	me: User!
-	user(id: ID!): User
-	chat(id: ID!): Chat
-	chats(first: Int, after: ID): [Chat!]!
+  me: User!
+  user(id: ID!): User
+  chat(id: ID!): Chat
+  chats(first: Int, after: ID): [Chat!]!
 }
 
 type Mutation {
-	createChat(userIds: [ID!]!): Chat!
-	deleteChat(id: ID!): Chat!
-	postMessage(chatId: ID!, text: String!, replyTo: ID): Message!
-	editMessage(id: ID!, text: String!): Message!
-	deleteMessage(id: ID!): Message!
-	setAsOnline: User
-	userTyping(chatId: ID!): User
+  createChat(userIds: [ID!]!): Chat!
+  deleteChat(id: ID!): Chat!
+  postMessage(chatId: ID!, text: String!, replyTo: ID): Message!
+  editMessage(id: ID!, text: String!): Message!
+  deleteMessage(id: ID!): Message!
+  setAsOnline: User
+  userTyping(chatId: ID!): User
 }
 
 type Subscription {
-	chatEvent(userId: ID!): ChatEvent!
+  chatEvent: ChatEvent!
 }
 
 type User {
-	id: ID!
-	name: String!
-	username: String!
-	email: String!
-	status: UserStatus! @goField(forceResolver: true)
-	createdAt: Time!
+  id: ID!
+  name: String!
+  username: String!
+  email: String!
+  status: UserStatus! @goField(forceResolver: true)
+  createdAt: Time!
 }
 
 enum UserStatus {
-	OFFLINE
-	ONLINE
+  OFFLINE
+  ONLINE
 }
 
 type Chat {
-	id: ID!
-	name: String!
-	members: [User!]!
-	messages(first: Int, after: ID, desc: Boolean): [Message!]!
-	createdBy: User
-	createdAt: Time!
-	lastPostedAt: Time!
+  id: ID!
+  name: String!
+  members: [User!]!
+  messages(first: Int, after: ID, desc: Boolean): [Message!]!
+  createdBy: User
+  createdAt: Time!
+  lastPostedAt: Time!
 }
 
 type Message {
-	id: ID!
-	content: String!
-	event: String!
-	sender: User
-	replyTo: Message
-	createdAt: Time!
-	editedAt: Time
+  id: ID!
+  content: String!
+  event: String!
+  sender: User
+  replyTo: Message
+  createdAt: Time!
+  editedAt: Time
 }
 
 type ChatEvent {
-	type: ChatEventType!
-	chatId: ID!
-	message: Message
-	user: User @goField(forceResolver: true)
+  type: ChatEventType!
+  chatId: ID!
+  message: Message
+  user: User @goField(forceResolver: true)
 }
 
 enum ChatEventType {
-	MESSAGE_POSTED
-	MESSAGE_EDITED
-	MESSAGE_DELETED
-	USER_TYPING
+  MESSAGE_POSTED
+  MESSAGE_EDITED
+  MESSAGE_DELETED
+  USER_TYPING
 }

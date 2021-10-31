@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/99designs/gqlgen/handler"
 	"github.com/bwmarrin/snowflake"
 	"github.com/habinkwon/chat-app/graph/model"
 	"github.com/habinkwon/chat-app/pkg/middleware/auth"
@@ -20,6 +21,7 @@ type Chat struct {
 	ChatMemberRepo  *mysql.ChatMember
 	ChatMessageRepo *mysql.ChatMessage
 	ChannelRepo     *redis.Channel
+	Auth            *auth.Middleware
 }
 
 func (s *Chat) CreateChat(ctx context.Context, userIds []int64) (id int64, err error) {
@@ -276,11 +278,21 @@ func (s *Chat) ListMessages(ctx context.Context, chatId int64, first int, after 
 	return s.ChatMessageRepo.List(ctx, chatId, first, after, desc)
 }
 
-func (s *Chat) ReceiveEvents(ctx context.Context, userID int64) (<-chan *model.ChatEvent, error) {
+func (s *Chat) ReceiveEvents(ctx context.Context) (<-chan *model.ChatEvent, error) {
+	init := handler.GetInitPayload(ctx)
+	headers, _ := init["headers"].(map[string]interface{})
+	authorization, _ := headers["Authorization"].(string)
+	if err := s.Auth.Authenticate(ctx, authorization); err != nil {
+		return nil, err
+	}
+	userId := auth.UserId(ctx)
+	if userId == 0 {
+		return nil, auth.ErrNoAuth
+	}
 	c := make(chan *model.ChatEvent, 1)
 	go func() {
 		defer close(c)
-		if err := s.ChannelRepo.StreamEvents(ctx, userID, c); err != nil {
+		if err := s.ChannelRepo.StreamEvents(ctx, userId, c); err != nil {
 			log.Print(err)
 		}
 	}()

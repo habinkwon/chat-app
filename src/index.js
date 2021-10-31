@@ -17,7 +17,7 @@ export class ChatClient {
         connectionParams: () => {
           return {
             headers: {
-              authorization: token ? `Bearer ${token}` : '',
+              Authorization: token ? `Bearer ${token}` : '',
             },
           }
         },
@@ -35,7 +35,7 @@ export class ChatClient {
       return {
         headers: {
           ...headers,
-          authorization: token ? `Bearer ${token}` : '',
+          Authorization: token ? `Bearer ${token}` : '',
         },
       }
     })
@@ -160,8 +160,8 @@ export class ChatClient {
     this.client
       .subscribe({
         query: gql`
-          subscription OnChatEvent($userId: ID!) {
-            chatEvent(userId: $userId) {
+          subscription OnChatEvent {
+            chatEvent {
               type
               chatId
               message {
@@ -179,9 +179,6 @@ export class ChatClient {
             }
           }
         `,
-        variables: {
-          userId: 1,
-        },
       })
       .subscribe({
         next({ data }) {
