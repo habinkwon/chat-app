@@ -1,6 +1,7 @@
 package util
 
 import (
+	"database/sql"
 	"encoding/binary"
 	"strconv"
 
@@ -41,4 +42,11 @@ func FormatID(id int64) string {
 	b := make([]byte, 8)
 	binary.BigEndian.PutUint64(b, uint64(id))
 	return strconv.FormatInt(int64(murmur3.Sum32(b)), 16)
+}
+
+func NullString(s sql.NullString) *string {
+	if s.Valid {
+		return &s.String
+	}
+	return nil
 }

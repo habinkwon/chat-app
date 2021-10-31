@@ -113,6 +113,10 @@ func (r *queryResolver) User(ctx context.Context, id int64) (*model.User, error)
 	return r.UserSvc.GetUser(ctx, id)
 }
 
+func (r *queryResolver) Users(ctx context.Context, first *int, after *int64) ([]*model.User, error) {
+	return r.UserSvc.ListUsers(ctx, util.IntOr(first, 10), util.Int64Or(after, 0))
+}
+
 func (r *queryResolver) Chat(ctx context.Context, id int64) (*model.Chat, error) {
 	return r.ChatSvc.GetChat(ctx, id)
 }
@@ -122,7 +126,6 @@ func (r *queryResolver) Chats(ctx context.Context, first *int, after *int64) ([]
 }
 
 func (r *subscriptionResolver) ChatEvent(ctx context.Context) (<-chan *model.ChatEvent, error) {
-	// auth.SetUserId(ctx, userID)
 	return r.ChatSvc.ReceiveEvents(ctx)
 }
 

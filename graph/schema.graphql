@@ -6,6 +6,7 @@ scalar Time
 type Query {
   me: User!
   user(id: ID!): User
+  users(first: Int, after: ID): [User!]!
   chat(id: ID!): Chat
   chats(first: Int, after: ID): [Chat!]!
 }
@@ -27,10 +28,21 @@ type Subscription {
 type User {
   id: ID!
   name: String!
-  username: String!
-  email: String!
+  nickname: String!
+  email: String
+  picture: String
+  livingPlace: String
+  preference1: String
+  preference2: String
+  preference3: String
+  selfIntroduction: String
+  role: UserRole!
   status: UserStatus! @goField(forceResolver: true)
-  createdAt: Time!
+}
+
+enum UserRole {
+  USER
+  GUEST
 }
 
 enum UserStatus {

@@ -79,6 +79,7 @@ func main() {
 	}
 	resolver := &graph.Resolver{
 		UserSvc: &service.User{
+			UserRepo:       &mysqlrepo.User{DB: db},
 			UserStatusRepo: &redisrepo.UserStatus{Redis: rdb},
 		},
 		ChatSvc: &service.Chat{

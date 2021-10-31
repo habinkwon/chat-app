@@ -5,11 +5,12 @@ import (
 
 	"github.com/habinkwon/chat-app/graph/model"
 	"github.com/habinkwon/chat-app/pkg/middleware/auth"
+	"github.com/habinkwon/chat-app/pkg/repository/mysql"
 	"github.com/habinkwon/chat-app/pkg/repository/redis"
-	"github.com/habinkwon/chat-app/pkg/util"
 )
 
 type User struct {
+	UserRepo       *mysql.User
 	UserStatusRepo *redis.UserStatus
 }
 
@@ -21,11 +22,7 @@ func (s *User) GetUser(ctx context.Context, id int64) (*model.User, error) {
 	if id == 0 {
 		id = userId
 	}
-	user := &model.User{
-		ID:   id,
-		Name: util.FormatID(id),
-	}
-	return user, nil
+	return s.UserRepo.Get(ctx, id)
 }
 
 func (s *User) GetUsers(ctx context.Context, ids []int64) ([]*model.User, error) {
@@ -33,11 +30,15 @@ func (s *User) GetUsers(ctx context.Context, ids []int64) ([]*model.User, error)
 	if userId == 0 {
 		return nil, auth.ErrNoAuth
 	}
-	users := make([]*model.User, len(ids))
-	for i, id := range ids {
-		users[i] = &model.User{ID: id}
+	return s.UserRepo.GetAll(ctx, ids)
+}
+
+func (s *User) ListUsers(ctx context.Context, first int, after int64) ([]*model.User, error) {
+	userId := auth.UserId(ctx)
+	if userId == 0 {
+		return nil, auth.ErrNoAuth
 	}
-	return users, nil
+	return s.UserRepo.List(ctx, first, after)
 }
 
 func (s *User) SetAsOnline(ctx context.Context) (*model.User, error) {
