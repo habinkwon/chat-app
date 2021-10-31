@@ -1,78 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<title>Chat</title>
-		<link href="/static/bootstrap.min.css" rel="stylesheet" />
-		<!-- <link href="/static/tailwind.min.css" rel="stylesheet" /> -->
-		<script src="chat.js"></script>
-		<link href="chat.css" rel="stylesheet" />
-	</head>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chat</title>
+    <link href="/static/bootstrap.min.css" rel="stylesheet" />
+    <!-- <link href="/static/tailwind.min.css" rel="stylesheet" /> -->
+    <script src="chat.js"></script>
+    <link href="chat.css" rel="stylesheet" />
+  </head>
 
-	<body>
-		<div className="container">
-			<div className="row">
-				<div className="col-2">
-					<div id="chatList"></div>
-				</div>
-				<div className="col">
-					<div id="chatView"></div>
-				</div>
-			</div>
-		</div>
-		<button id="post">Post</button>
-		<script>
-			const client = new chat.ChatClient({
-				httpUrl: 'https://chat.habin.io/query',
-				wsUrl: 'wss://chat.habin.io/query',
-				// httpUrl: 'http://localhost:8080/query',
-				// wsUrl: 'ws://localhost:8080/query',
-				token: '1',
-			})
+  <body>
+    <div className="container">
+      <div className="row">
+        <div className="col-2">
+          <div id="chatList"></div>
+        </div>
+        <div className="col">
+          <div id="chatView"></div>
+        </div>
+      </div>
+    </div>
+    <div><input type="text" id="token" /><button id="setToken">Set token</button></div>
+    <div><button id="post">Post</button></div>
+    <script>
+      const client = new chat.ChatClient({
+        // httpUrl: 'https://chat.habin.io/query',
+        // wsUrl: 'wss://chat.habin.io/query',
+        httpUrl: 'http://localhost:8080/query',
+        wsUrl: 'ws://localhost:8080/query',
+        token: localStorage.getItem('token'),
+      })
 
-			let chatId
-			;(async () => {
-				try {
-					chatId = await client.createChat(3)
-					// console.log(await client.deleteChat(chatId))
+      let chatId
+      ;(async () => {
+        try {
+          chatId = await client.createChat(3)
+          // console.log(await client.deleteChat(chatId))
 
-					let messages = await client.listMessages({ chatId, limit: 5 })
-					console.log(messages)
-					messages = await client.listMessages({ chatId, limit: 5, after: messages[0].id })
-					console.log(messages)
+          let messages = await client.listMessages({ chatId, limit: 5 })
+          console.log(messages)
+          messages = await client.listMessages({ chatId, limit: 5, after: messages[0].id })
+          console.log(messages)
 
-					client.streamMessages({
-						onMessagePosted: (message) => console.log(message),
-						onUserTyping: (userName) => console.log(userName),
-					})
-				} catch (e) {
-					console.log(e)
-				}
-			})()
+          client.streamMessages({
+            onMessagePosted: (message) => console.log(message),
+            onUserTyping: (userName) => console.log(userName),
+          })
+        } catch (e) {
+          console.log(e)
+        }
+      })()
 
-			async function loadChatList() {
-				const $list = document.querySelector('#chatList')
-				$list.innerHTML = 'Loading...'
+      async function loadChatList() {
+        const $list = document.querySelector('#chatList')
+        $list.innerHTML = 'Loading...'
 
-				const chats = await client.getChats()
-				$list.innerHTML = ''
+        const chats = await client.getChats()
+        $list.innerHTML = ''
 
-				chats.forEach((chat) => {
-					$list.innerHTML += `
+        chats.forEach((chat) => {
+          $list.innerHTML += `
 					<div>
 						<strong>${chat.name}</strong><br>
 						${chat.lastMessage} ${chat.lastPostedAt}
 					</div>`
-				})
-			}
-			loadChatList()
+        })
+      }
+      loadChatList()
 
-			document.querySelector('#post').onclick = () => {
-				client.postMessage({
-					chatId,
-					message: Date.now().toString(),
-				})
-			}
-		</script>
-	</body>
+      document.querySelector('#setToken').onclick = () => {
+        localStorage.setItem('token', document.querySelector('#token').value)
+      }
+
+      document.querySelector('#post').onclick = () => {
+        client.postMessage({
+          chatId,
+          message: Date.now().toString(),
+        })
+      }
+    </script>
+  </body>
 </html>

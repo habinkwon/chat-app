@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"encoding/base64"
 	"flag"
 	"fmt"
 	"log"
@@ -29,6 +28,7 @@ import (
 	mysqlrepo "github.com/habinkwon/chat-app/pkg/repository/mysql"
 	redisrepo "github.com/habinkwon/chat-app/pkg/repository/redis"
 	"github.com/habinkwon/chat-app/pkg/service"
+	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 )
 
@@ -36,8 +36,15 @@ func main() {
 	listenAddr := flag.String("listen", ":8080", "")
 	mysqlAddr := flag.String("mysql", "root@tcp(maria)/chat?parseTime=true", "")
 	redisAddr := flag.String("redis", "redis:6379", "")
-	secretStr := flag.String("secret", "", "")
+	secretKey := flag.String("secret", "", "")
 	flag.Parse()
+
+	if err := godotenv.Load(); err != nil && !os.IsNotExist(err) {
+		log.Fatal(fmt.Errorf("error loading .env file: %w", err))
+	}
+	if key := os.Getenv("SECRET_KEY"); key != "" {
+		*secretKey = key
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	sigs := make(chan os.Signal, 1)
@@ -65,11 +72,6 @@ func main() {
 	idNode, err := snowflake.NewNode(0)
 	if err != nil {
 		log.Fatal(fmt.Errorf("error initializing snowflake: %w", err))
-	}
-
-	secret, err := base64.StdEncoding.DecodeString(*secretStr)
-	if err != nil {
-		log.Fatal(fmt.Errorf("invalid secret: %w", err))
 	}
 
 	resolver := &graph.Resolver{
@@ -109,7 +111,7 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(c.Handler)
-	r.Use(auth.Middleware(secret))
+	r.Use(auth.Middleware([]byte(*secretKey)))
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	r.Handle("/query", s)
 
