@@ -5,20 +5,11 @@ package graph
 
 import (
 	"context"
-	"strings"
 
 	"github.com/habinkwon/chat-app/graph/generated"
 	"github.com/habinkwon/chat-app/graph/model"
 	"github.com/habinkwon/chat-app/pkg/util"
 )
-
-func (r *chatResolver) Name(ctx context.Context, obj *model.Chat) (string, error) {
-	memberNames, err := r.ChatSvc.GetMemberNames(ctx, obj.ID)
-	if err != nil {
-		return "", err
-	}
-	return strings.Join(memberNames, ", "), nil
-}
 
 func (r *chatResolver) Members(ctx context.Context, obj *model.Chat) ([]*model.User, error) {
 	memberIds, err := r.ChatSvc.GetMemberIds(ctx, obj.ID)
@@ -112,18 +103,6 @@ func (r *mutationResolver) SetAsOnline(ctx context.Context) (*model.User, error)
 
 func (r *mutationResolver) UserTyping(ctx context.Context, chatID int64) (*model.User, error) {
 	return r.ChatSvc.UserTyping(ctx, chatID)
-}
-
-func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	return r.UserSvc.GetUser(ctx, 0)
-}
-
-func (r *queryResolver) User(ctx context.Context, id int64) (*model.User, error) {
-	return r.UserSvc.GetUser(ctx, id)
-}
-
-func (r *queryResolver) Users(ctx context.Context, first *int, after *int64) ([]*model.User, error) {
-	return r.UserSvc.ListUsers(ctx, util.IntOr(first, 10), util.Int64Or(after, 0))
 }
 
 func (r *queryResolver) Chat(ctx context.Context, id int64) (*model.Chat, error) {

@@ -116,19 +116,6 @@ func (s *Chat) GetMemberIds(ctx context.Context, chatId int64) (memberIds []int6
 	return
 }
 
-func (s *Chat) GetMemberNames(ctx context.Context, chatId int64) (memberNames []string, err error) {
-	userId := auth.UserId(ctx)
-	if userId == 0 {
-		return nil, auth.ErrNoAuth
-	}
-	if ok, err := s.ChatMemberRepo.Exists(ctx, chatId, userId); err != nil {
-		return nil, err
-	} else if !ok {
-		return nil, auth.ErrPerm
-	}
-	return s.ChatMemberRepo.GetNames(ctx, chatId)
-}
-
 func (s *Chat) PostMessage(ctx context.Context, chatId int64, content string, replyTo *int64) (id int64, err error) {
 	userId := auth.UserId(ctx)
 	if userId == 0 {

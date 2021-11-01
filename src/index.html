@@ -35,6 +35,8 @@
       ;(async () => {
         try {
           chatId = await client.createChat(3)
+          console.log('chat', chatId)
+
           // console.log(await client.deleteChat(chatId))
 
           let messages = await client.listMessages({ chatId, limit: 5 })
@@ -61,7 +63,7 @@
         chats.forEach((chat) => {
           $list.innerHTML += `
 					<div>
-						<strong>${chat.name}</strong><br>
+						<strong>${chat.memberIds.join(', ')}</strong><br>
 						${chat.lastMessage} ${chat.lastPostedAt}
 					</div>`
         })

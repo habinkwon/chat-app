@@ -16,18 +16,8 @@ type ChatEvent struct {
 }
 
 type User struct {
-	ID               int64      `json:"id"`
-	Name             string     `json:"name"`
-	Nickname         string     `json:"nickname"`
-	Email            *string    `json:"email"`
-	Picture          *string    `json:"picture"`
-	LivingPlace      *string    `json:"livingPlace"`
-	Preference1      *string    `json:"preference1"`
-	Preference2      *string    `json:"preference2"`
-	Preference3      *string    `json:"preference3"`
-	SelfIntroduction *string    `json:"selfIntroduction"`
-	Role             UserRole   `json:"role"`
-	Status           UserStatus `json:"status"`
+	ID     int64      `json:"id"`
+	Status UserStatus `json:"status"`
 }
 
 type ChatEventType string
@@ -72,47 +62,6 @@ func (e *ChatEventType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ChatEventType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type UserRole string
-
-const (
-	UserRoleUser  UserRole = "USER"
-	UserRoleGuest UserRole = "GUEST"
-)
-
-var AllUserRole = []UserRole{
-	UserRoleUser,
-	UserRoleGuest,
-}
-
-func (e UserRole) IsValid() bool {
-	switch e {
-	case UserRoleUser, UserRoleGuest:
-		return true
-	}
-	return false
-}
-
-func (e UserRole) String() string {
-	return string(e)
-}
-
-func (e *UserRole) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = UserRole(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid UserRole", str)
-	}
-	return nil
-}
-
-func (e UserRole) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

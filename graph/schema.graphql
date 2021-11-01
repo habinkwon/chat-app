@@ -4,9 +4,6 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
 scalar Time
 
 type Query {
-  me: User!
-  user(id: ID!): User
-  users(first: Int, after: ID): [User!]!
   chat(id: ID!): Chat
   chats(first: Int, after: ID): [Chat!]!
 }
@@ -27,22 +24,7 @@ type Subscription {
 
 type User {
   id: ID!
-  name: String!
-  nickname: String!
-  email: String
-  picture: String
-  livingPlace: String
-  preference1: String
-  preference2: String
-  preference3: String
-  selfIntroduction: String
-  role: UserRole!
   status: UserStatus! @goField(forceResolver: true)
-}
-
-enum UserRole {
-  USER
-  GUEST
 }
 
 enum UserStatus {
@@ -52,7 +34,6 @@ enum UserStatus {
 
 type Chat {
   id: ID!
-  name: String! @goField(forceResolver: true)
   members: [User!]!
   messages(first: Int, after: ID, desc: Boolean): [Message!]!
   createdBy: User

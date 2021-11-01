@@ -1,18 +1,3 @@
-CREATE TABLE IF NOT EXISTS user (
-	id BIGINT PRIMARY KEY,
-	name VARCHAR(255) NOT NULL,
-	nickname VARCHAR(255) NOT NULL,
-	email VARCHAR(255),
-	picture VARCHAR(255),
-	livingPlace VARCHAR(255),
-	preference1 VARCHAR(255),
-	preference2 VARCHAR(255),
-	preference3 VARCHAR(255),
-	SelfIntroduction VARCHAR(255),
-	role ENUM('USER', 'GUEST') NOT NULL DEFAULT 'USER',
-	UNIQUE (email)
-);
-
 CREATE TABLE IF NOT EXISTS chats (
 	id BIGINT PRIMARY KEY,
 	created_by BIGINT NOT NULL, -- REFERENCES users (id) ON DELETE SET NULL

@@ -73,28 +73,3 @@ func (r *ChatMember) GetIds(ctx context.Context, chatId int64) (memberIds []int6
 	}
 	return
 }
-
-func (r *ChatMember) GetNames(ctx context.Context, chatId int64) (memberNames []string, err error) {
-	rows, err := r.DB.QueryContext(ctx, `
-	SELECT COALESCE(NULLIF(U.nickname, ''), U.name)
-	FROM chat_members M
-	INNER JOIN user U
-	ON U.id = M.user_id
-	WHERE M.chat_id = ?
-	`, chatId)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var name string
-		if err = rows.Scan(&name); err != nil {
-			return
-		}
-		memberNames = append(memberNames, name)
-	}
-	if err = rows.Err(); err != nil {
-		return
-	}
-	return
-}
