@@ -7,6 +7,7 @@ import './style.css'
 
 export class ChatClient {
   constructor({ httpUrl, wsUrl, token }) {
+    this.token = token
     const httpLink = createHttpLink({
       uri: httpUrl,
     })
@@ -17,7 +18,7 @@ export class ChatClient {
         connectionParams: () => {
           return {
             headers: {
-              Authorization: token ? `Bearer ${token}` : '',
+              Authorization: token ? `Bearer ${this._getToken()}` : '',
             },
           }
         },
@@ -35,7 +36,7 @@ export class ChatClient {
       return {
         headers: {
           ...headers,
-          Authorization: token ? `Bearer ${token}` : '',
+          Authorization: token ? `Bearer ${this._getToken()}` : '',
         },
       }
     })
@@ -43,7 +44,13 @@ export class ChatClient {
       link: authLink.concat(splitLink),
       cache: new InMemoryCache(),
     })
-    this.token = token
+  }
+
+  _getToken() {
+    if (typeof this.token === 'function') {
+      return this.token()
+    }
+    return this.token
   }
 
   async createChat(userId) {
