@@ -53,7 +53,8 @@ func (m *Middleware) Middleware(next http.Handler) http.Handler {
 
 func (m *Middleware) Authenticate(ctx context.Context, authorization string) error {
 	token := strings.TrimPrefix(authorization, "Bearer ")
-	tok, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+	p := &jwt.Parser{SkipClaimsValidation: true}
+	tok, err := p.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		return m.Secret, nil
 	})
 	if err != nil {
