@@ -214,5 +214,3 @@ export class ChatClient {
       })
   }
 }
-
-export class ChatView {}
