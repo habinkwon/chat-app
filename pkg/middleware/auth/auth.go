@@ -44,6 +44,7 @@ func (m *Middleware) Middleware(next http.Handler) http.Handler {
 		if auth := r.Header.Get("Authorization"); auth != "" {
 			if err := m.Authenticate(ctx, auth); err != nil {
 				http.Error(w, err.Error(), http.StatusUnauthorized)
+				return
 			}
 		}
 		next.ServeHTTP(w, r.WithContext(ctx))

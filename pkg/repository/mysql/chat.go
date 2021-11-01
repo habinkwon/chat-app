@@ -48,13 +48,13 @@ func (r *Chat) Exists(ctx context.Context, userIds []int64) (chatId int64, err e
 	FROM chat_members A
 	WHERE user_id IN (?%s)
 	GROUP BY chat_id
-	HAVING COUNT(*) = (
+	HAVING COUNT(*) = %d AND COUNT(*) = (
 		SELECT COUNT(*)
 		FROM chat_members B
 		WHERE B.chat_id = A.chat_id
 		GROUP BY B.chat_id
 	)
-	`, in), args...).Scan(&chatId)
+	`, in, len(userIds)), args...).Scan(&chatId)
 	if err == sql.ErrNoRows {
 		return 0, nil
 	} else if err != nil {
