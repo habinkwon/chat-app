@@ -3,7 +3,7 @@ module github.com/habinkwon/chat-app
 go 1.17
 
 require (
-	github.com/99designs/gqlgen v0.14.1-0.20211020130656-7db941a56e74
+	github.com/99designs/gqlgen v0.14.1-0.20211105084145-4a4b5601a661
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/go-chi/chi/v5 v5.0.4
 	github.com/go-redis/redis/v8 v8.11.3
@@ -23,5 +23,5 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
-	golang.org/x/sys v0.0.0-20211023085530-d6a326fbbf70 // indirect
+	golang.org/x/sys v0.0.0-20211103235746-7861aae1554b // indirect
 )
